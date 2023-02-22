@@ -57,6 +57,7 @@ class FlutterGen {
     required this.lineLength,
     required this.assets,
     required this.fonts,
+    required this.i18n,
     required this.integrations,
     required this.colors,
   });
@@ -72,6 +73,9 @@ class FlutterGen {
 
   @JsonKey(name: 'fonts', required: true)
   final FlutterGenFonts fonts;
+
+  @JsonKey(name: 'i18n', required: true)
+  final FlutterGenI18n i18n;
 
   @JsonKey(name: 'integrations', required: true)
   final FlutterGenIntegrations integrations;
@@ -148,6 +152,29 @@ class FlutterGenFonts {
   final FlutterGenElementOutputs outputs;
 
   factory FlutterGenFonts.fromJson(Map json) => _$FlutterGenFontsFromJson(json);
+}
+
+@JsonSerializable()
+class FlutterGenI18n {
+  FlutterGenI18n({
+    required this.enabled,
+    required this.outputs,
+    this.directory,
+    this.localeForDocs="en"
+  });
+
+  @JsonKey(name: 'enabled', required: true)
+  final bool enabled;
+
+  @JsonKey(name: 'outputs', required: true)
+  final FlutterGenElementOutputs outputs;
+
+  @JsonKey(name: 'directory')
+  final String? directory;
+  @JsonKey(name: 'locale_for_docs')
+  final String localeForDocs;
+
+  factory FlutterGenI18n.fromJson(Map json) => _$FlutterGenI18nFromJson(json);
 }
 
 @JsonSerializable()

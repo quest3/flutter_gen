@@ -1,0 +1,15 @@
+name: test
+
+flutter_gen:
+  output: lib/gen/ # Optional (default: lib/gen/)
+  line_length: 80 # Optional (default: 80)
+
+  i18n:
+    enabled: true
+    directory: assets/i18n
+
+flutter:
+  assets:
+    - assets/images
+    - assets/i18n
+    - assets/i18n/en

@@ -48,7 +48,8 @@ class FlutterGenBuilder extends Builder {
         for (final name in [
           generator.assetsName,
           generator.colorsName,
-          generator.fontsName
+          generator.fontsName,
+          generator.i18nName,
         ])
           join(ouput, name),
       ],

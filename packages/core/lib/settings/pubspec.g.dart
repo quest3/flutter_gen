@@ -73,6 +73,7 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
             'line_length',
             'assets',
             'fonts',
+            'i18n',
             'integrations',
             'colors'
           ],
@@ -84,6 +85,8 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
               'assets', (v) => FlutterGenAssets.fromJson(v as Map)),
           fonts: $checkedConvert(
               'fonts', (v) => FlutterGenFonts.fromJson(v as Map)),
+          i18n:
+              $checkedConvert('i18n', (v) => FlutterGenI18n.fromJson(v as Map)),
           integrations: $checkedConvert(
               'integrations', (v) => FlutterGenIntegrations.fromJson(v as Map)),
           colors: $checkedConvert(
@@ -153,6 +156,27 @@ FlutterGenFonts _$FlutterGenFontsFromJson(Map json) => $checkedCreate(
         );
         return val;
       },
+    );
+
+FlutterGenI18n _$FlutterGenI18nFromJson(Map json) => $checkedCreate(
+      'FlutterGenI18n',
+      json,
+      ($checkedConvert) {
+        $checkKeys(
+          json,
+          requiredKeys: const ['enabled', 'outputs'],
+        );
+        final val = FlutterGenI18n(
+          enabled: $checkedConvert('enabled', (v) => v as bool),
+          outputs: $checkedConvert(
+              'outputs', (v) => FlutterGenElementOutputs.fromJson(v as Map)),
+          directory: $checkedConvert('directory', (v) => v as String?),
+          localeForDocs:
+              $checkedConvert('locale_for_docs', (v) => v as String? ?? "en"),
+        );
+        return val;
+      },
+      fieldKeyMap: const {'localeForDocs': 'locale_for_docs'},
     );
 
 FlutterGenIntegrations _$FlutterGenIntegrationsFromJson(Map json) =>

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
+import 'package:flutter_gen_core/generators/i18n_generator.dart';
 import 'package:path/path.dart';
 
 import 'generators/assets_generator.dart';
@@ -15,12 +16,14 @@ class FlutterGenerator {
     this.assetsName = 'assets.gen.dart',
     this.colorsName = 'colors.gen.dart',
     this.fontsName = 'fonts.gen.dart',
+    this.i18nName = 'i18n.gen.dart',
   });
 
   final File pubspecFile;
   final String assetsName;
   final String colorsName;
   final String fontsName;
+  final String i18nName;
 
   Future<void> build({Config? config, FileWriter? writer}) async {
     config ??= loadPubspecConfigOrNull(pubspecFile);
@@ -75,6 +78,14 @@ class FlutterGenerator {
           normalize(join(pubspecFile.parent.path, output, fontsName));
       writer(generated, fontsPath);
       stdout.writeln('Generated: $fontsPath');
+    }
+    if (flutterGen.i18n.enabled && flutter.assets.isNotEmpty) {
+      final generated =
+          generateI18n(formatter, pubspecFile.parent, flutterGen.i18n);
+      final i18nPath =
+          normalize(join(pubspecFile.parent.path, output, i18nName));
+      writer(generated, i18nPath);
+      stdout.writeln('Generated: $i18nPath');
     }
 
     stdout.writeln('FlutterGen finished.');

@@ -6,7 +6,9 @@ import 'package:flutter_gen_core/flutter_generator.dart';
 import 'package:flutter_gen_core/generators/assets_generator.dart';
 import 'package:flutter_gen_core/generators/colors_generator.dart';
 import 'package:flutter_gen_core/generators/fonts_generator.dart';
+import 'package:flutter_gen_core/generators/i18n_generator.dart';
 import 'package:flutter_gen_core/settings/config.dart';
+import 'package:flutter_gen_core/settings/pubspec.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
@@ -25,6 +27,34 @@ Future<void> expectedAssetsGen(
 
   final actual = generateAssets(
       AssetsGenConfig.fromConfig(pubspecFile, config), formatter);
+  final expected =
+      formatter.format(File(fact).readAsStringSync().replaceAll('\r\n', '\n'));
+
+  expect(
+    File(generated).readAsStringSync(),
+    isNotEmpty,
+  );
+  expect(actual, expected);
+}
+
+///i18n
+Future<void> expectedI18nGen(
+    String pubspec, String generated, String fact) async {
+  await FlutterGenerator(File(pubspec), assetsName: basename(generated))
+      .build();
+
+  final pubspecFile = File(pubspec);
+  final config = loadPubspecConfig(pubspecFile);
+  final formatter = DartFormatter(
+      pageWidth: config.pubspec.flutterGen.lineLength, lineEnding: '\n');
+
+  final actual = generateI18n(
+      formatter,
+      pubspecFile.parent,
+      FlutterGenI18n(
+          enabled: config.pubspec.flutterGen.i18n.enabled,
+          outputs: config.pubspec.flutterGen.i18n.outputs,
+          directory: config.pubspec.flutterGen.i18n.directory));
   final expected =
       formatter.format(File(fact).readAsStringSync().replaceAll('\r\n', '\n'));
 

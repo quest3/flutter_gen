@@ -1,0 +1,77 @@
+{
+  "common": {
+    "active": "On",
+    "inactive": "Off"
+  },
+  "settings": {
+    "title": "Settings",
+    "logout": "Logout"
+  },
+  "version": {
+    "title": "Version",
+    "newVersion": "New",
+    "checkVersion": "New Version",
+    "upToDate": "Latest version",
+    "clickUpdate": "Click to update the new version {version}"
+  },
+  "upgrade": {
+    "title": "New Version",
+    "cancel": "Later",
+    "update": "Upgrade Now"
+  },
+  "languages": {
+    "title": "Language",
+    "zh-Hans": "简体中文",
+    "zh-Hant": "繁體中文",
+    "en": "English"
+  },
+  "camera": {
+    "title": "Scan QR code",
+    "scannerHint": "Find a code to scan",
+    "applyPermission": "Scanning the QR code requires access to your \"Camera\" permission. please enable the permission in the system settings.",
+    "openSetting": "Set up"
+  },
+  "biometric": {
+    "goToSettingsButton": "Set up",
+    "goToSettingsDescription": "{type} is not set on your device. Please go to the device system \"Settings\" to enable",
+    "lockOut": "{type} has been locked due to too many retries, please lock and unlock your screen to enable it",
+    "unSupportBiometric": "Your device does not support {type}",
+    "iris": "Face/Fingerprint ID",
+    "android": {
+      "face": "Face ID",
+      "fingerprint": "Fingerprint",
+      "biometricHint": "Please use {type} to verify your identity",
+      "biometricNotRecognized": "{type} verification failed, please try again",
+      "biometricSuccess": "{type} verified successfully",
+      "signInTitle": "{type} authentication",
+      "biometricRequiredTitle": "Set up {type}",
+      "cancelButton": "Cancel"
+    },
+    "ios": {
+      "face": "Face ID",
+      "fingerprint": "Touch ID",
+      "cancelButton": "Got it"
+    }
+  },
+  "unlock": {
+    "welcome": "Welcome back to Quest3",
+    "hint": "Click the icon to unlock {type} ",
+    "biometricReason": "Unlock verification",
+    "reLogin": "{type} unlock failed, please log in again",
+    "retryUnlock": "{type} unlocking failed, please try again"
+  },
+  "notification": {
+    "title": "Notification"
+  },
+  "following": {
+    "title": "Following Communities"
+  },
+  "nft": {
+    "title": "NFTs in Quest3",
+    "reward": "🎁 Reward NFT",
+    "sbt": "👻 SBT NFT"
+  },
+  "connect": {
+    "login_success": "Login success"
+  }
+}

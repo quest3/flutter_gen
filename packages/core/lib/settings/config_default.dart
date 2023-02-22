@@ -38,7 +38,10 @@ flutter_gen:
     # Optional
     outputs:
       class_name: FontFamily
-
+  i18n:
+    enabled: false    
+    outputs:
+      class_name: I18nKeys
   colors:
     # Optional
     enabled: true

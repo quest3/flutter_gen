@@ -1,0 +1,56 @@
+{
+  "copy": "Copy",
+  "claim": "Claim",
+  "claimable": "Claimable",
+  "claimed": "Claimed",
+  "pending": "Pending",
+  "missed": "Missed",
+  "invalid": "Invalid",
+  "expired": "Expired",
+  "ended": "Ended",
+  "coming": "Coming",
+  "ongoing": "Ongoing",
+  "scheduled": "Scheduled",
+  "description": "Description",
+  "rp": "RP",
+  "wl": "WL",
+  "unofficial": "Unofficial",
+  "nft": "NFT",
+  "error": {
+    "network": "Connection timed out, please try again later",
+    "general": "Server is busy, please try again later",
+    "invalidToken": "Your information has expired, please log in again and try again"
+  },
+  "relativeTime": {
+    "s": "just now",
+    "mm": "{count} minutes ago",
+    "hh": "{count} hours ago",
+    "dd": "{count} days ago"
+  },
+  "copyComplete": "Copied",
+  "paste": "Paste",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "done": "Completed",
+  "next": "Next",
+  "popup": {
+    "title": "Tips",
+    "confirm": "Confirm"
+  },
+  "noMore": "- All loaded -",
+  "empty": "Uh, there’s nothing here.",
+  "or": "or",
+  "connect": {
+    "connect": "Connect",
+    "description": "Please select below methods to log in",
+    "metaMask": "MetaMask",
+    "trustWallet": "Trust Wallet",
+    "rainbowWallet": "Rainbow Wallet",
+    "particleWallet": "Particle Wallet",
+    "twitter": "Twitter",
+    "discord": "Discord",
+    "steam": "Steam",
+    "twitch": "Twitch",
+    "telegram": "Telegram"
+  }
+}

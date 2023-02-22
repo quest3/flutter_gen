@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_gen_core/settings/config_default.dart';
 import 'package:path/path.dart';
+import 'package:pretty_json/pretty_json.dart';
 import 'package:yaml/yaml.dart';
 
 import '../utils/error.dart';
@@ -26,6 +27,7 @@ Config loadPubspecConfig(File pubspecFile) {
   final userMap = loadYaml(content) as Map?;
   final defaultMap = loadYaml(configDefaultYamlContent) as Map?;
   final mergedMap = mergeMap([defaultMap, userMap]);
+  // stderr.writeln("mergedMap=${prettyJson(mergedMap)}");
   final pubspec = Pubspec.fromJson(mergedMap);
   return Config._(pubspec: pubspec, pubspecFile: pubspecFile);
 }
