@@ -13,11 +13,10 @@ environment:
 dependencies:
 #  flutter_gen_core: 5.2.0
   flutter_gen_core:
-#    git:
-#      url: https://github.com/quest3/flutter_gen.git
-#      path: packages/core
-#      ref: 961725bfc445cd761b43aa4f9f7a5b0e94977b16
-    path: ../core
+    git:
+      url: https://github.com/quest3/flutter_gen.git
+      path: packages/core
+      ref: 802a6c4bfa920524129255303d3d99fb73228069
   build: '>=2.0.0 <3.0.0'
   collection: '>=1.15.0 <2.0.0'
   crypto: '>=3.0.0 <4.0.0'
