@@ -4,20 +4,19 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:dartx/dartx.dart';
+import 'package:flutter_gen_core/generators/generator_helper.dart';
+import 'package:flutter_gen_core/generators/integrations/flare_integration.dart';
+import 'package:flutter_gen_core/generators/integrations/integration.dart';
+import 'package:flutter_gen_core/generators/integrations/lottie_integration.dart';
+import 'package:flutter_gen_core/generators/integrations/rive_integration.dart';
+import 'package:flutter_gen_core/generators/integrations/svg_integration.dart';
+import 'package:flutter_gen_core/settings/asset_type.dart';
+import 'package:flutter_gen_core/settings/config.dart';
+import 'package:flutter_gen_core/settings/pubspec.dart';
+import 'package:flutter_gen_core/utils/error.dart';
+import 'package:flutter_gen_core/utils/string.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart';
-
-import '../settings/asset_type.dart';
-import '../settings/config.dart';
-import '../settings/pubspec.dart';
-import '../utils/error.dart';
-import '../utils/string.dart';
-import 'generator_helper.dart';
-import 'integrations/flare_integration.dart';
-import 'integrations/integration.dart';
-import 'integrations/rive_integration.dart';
-import 'integrations/svg_integration.dart';
-import 'integrations/lottie_integration.dart';
 
 class AssetsGenConfig {
   AssetsGenConfig._(
@@ -34,9 +33,7 @@ class AssetsGenConfig {
       config.pubspec.packageName,
       config.pubspec.flutterGen,
       config.pubspec.flutter.assets,
-      config.pubspec.flutterGen.assets.exclude
-          .map((pattern) => Glob(pattern))
-          .toList(),
+      config.pubspec.flutterGen.assets.exclude.map(Glob.new).toList(),
     );
   }
 
@@ -73,7 +70,6 @@ String generateAssets(
       LottieIntegration(config.packageParameterLiteral),
   ];
 
-  // TODO: This code will be removed.
   // ignore: deprecated_member_use_from_same_package
   final deprecatedStyle = config.flutterGen.assets.style != null;
   final deprecatedPackageParam =
@@ -244,12 +240,12 @@ AssetType _constructAssetTree(
 }
 
 _Statement? _createAssetTypeStatement(
-  String rootPath,
+  AssetsGenConfig config,
   AssetType assetType,
   List<Integration> integrations,
   String name,
 ) {
-  final childAssetAbsolutePath = join(rootPath, assetType.path);
+  final childAssetAbsolutePath = join(config.rootPath, assetType.path);
   if (assetType.isSupportedImage) {
     return _Statement(
       type: 'AssetGenImage',
@@ -276,11 +272,15 @@ _Statement? _createAssetTypeStatement(
       (element) => element.isSupport(assetType),
     );
     if (integration == null) {
+      var assetKey = posixStyle(assetType.path);
+      if (config.flutterGen.assets.outputs.packageParameterEnabled) {
+        assetKey = 'packages/${config._packageName}/$assetKey';
+      }
       return _Statement(
         type: 'String',
         filePath: assetType.path,
         name: name,
-        value: '\'${posixStyle(assetType.path)}\'',
+        value: '\'$assetKey\'',
         isConstConstructor: false,
         isDirectory: false,
         needDartDoc: true,
@@ -327,7 +327,7 @@ String _dotDelimiterStyleDefinition(
           .mapToIsUniqueWithoutExtension()
           .map(
             (e) => _createAssetTypeStatement(
-              config.rootPath,
+              config,
               e.assetType,
               integrations,
               (e.isUniqueWithoutExtension
@@ -415,7 +415,7 @@ String _flatStyleDefinition(
       .mapToIsUniqueWithoutExtension()
       .map(
         (e) => _createAssetTypeStatement(
-          config.rootPath,
+          config,
           e.assetType,
           integrations,
           createName(e),
@@ -452,7 +452,7 @@ String _assetValuesDefinition(List<_Statement> statements) {
   if (values.isEmpty) return '';
   final names = values.map((value) => value.name).join(', ');
   var type = values.first.type;
-  for (var value in values) {
+  for (final value in values) {
     if (type != value.type) {
       type = 'dynamic';
       break;
@@ -570,7 +570,16 @@ class AssetGenImage {
     );
   }
 
-  ImageProvider provider() => AssetImage(_assetName);
+  ImageProvider provider({
+    AssetBundle? bundle,
+    String? package$packageParameter,
+  }) {
+    return AssetImage(
+      _assetName,
+      bundle: bundle,
+      package: package,
+    );
+  }
 
   String get path => _assetName;
 

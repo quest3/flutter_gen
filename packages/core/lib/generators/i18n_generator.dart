@@ -10,7 +10,7 @@ import '../settings/pubspec.dart';
 import '../utils/error.dart';
 import 'generator_helper.dart';
 
-const _tempSeparator = "_@#_";
+const _tempSeparator = '_@#_';
 const _separatorsToRemove = ['-', '_', '.'];
 
 String generateI18n(
@@ -19,7 +19,7 @@ String generateI18n(
   FlutterGenI18n i18nConfig,
 ) {
   Directory i18nDirectory =
-      Directory("${rootDirectory.path}/${i18nConfig.directory}");
+      Directory('${rootDirectory.path}/${i18nConfig.directory}');
   if (!i18nDirectory.existsSync()) {
     throw InvalidSettingsException(
         'directory "${i18nDirectory.path}" not exists.');
@@ -42,7 +42,7 @@ LocaleData _generateDictionaries(
   List<LocaleData> localeData = dirs
       .map((e) => LocaleData(
           _generateDictionariesForLocale(
-              Directory("${i18nDirectory.path}/${e.nameWithoutExtension}")),
+              Directory('${i18nDirectory.path}/${e.nameWithoutExtension}')),
           e.nameWithoutExtension))
       .toList();
   return _determineLocaleData(localeData, localeForDocs);
@@ -80,22 +80,22 @@ LocaleData _determineLocaleData(
       continue;
     }
     missing.addAll(data.keys.where((e) => !maxDatakeys.contains(e)).map(
-        (e) => "warning: ${maxKeyData.localeName}.json missing key: \"$e\""));
+        (e) => 'warning: ${maxKeyData.localeName}.json missing key: \"$e\"'));
     missing.addAll(maxDatakeys
         .where((e) => !data.keys.contains(e))
-        .map((e) => "warning: ${data.localeName}.json missing key: \"$e\""));
+        .map((e) => 'warning: ${data.localeName}.json missing key: \"$e\"'));
     missing.addAll(data.namespaces
         .map((e) => e.flattenData.entries.map((entry) =>
-            MapEntry("${e.namespaceName}.${entry.key}", entry.value)))
+            MapEntry('${e.namespaceName}.${entry.key}', entry.value)))
         .reduce((value, e) => value.append(e))
         .where((e) => e.value.toString().isEmpty)
         .map((e) =>
-            "warning: ${data.localeName}.json empty content: \"${e.key}\""));
+            'warning: ${data.localeName}.json empty content: \"${e.key}\"'));
   }
   missing.sort(
     (a, b) => a.compareTo(b),
   );
-  stderr.writeln(missing.join("\n"));
+  stderr.writeln(missing.join('\n'));
   if (differentKeyCount) {
     return maxKeyData;
   } else {
@@ -108,7 +108,7 @@ List<NamespaceData> _generateDictionariesForLocale(Directory localeDir) {
   List<File> files = localeDir
       .listSync()
       .whereType<File>()
-      .where((e) => e.extension == ".json")
+      .where((e) => e.extension == '.json')
       .toList();
   return files
       .map((e) => NamespaceData(_readJsonFile(e), e.nameWithoutExtension))
@@ -141,7 +141,7 @@ class LocaleData {
     buffer.writeln('$className._();');
     for (var namespace in namespaces) {
       buffer.writeln(
-          "static const ${namespace.className} ${namespace.namespaceName} = ${namespace.className}();");
+          'static const ${namespace.className} ${namespace.namespaceName} = ${namespace.className}();');
     }
     buffer.writeln('}');
     for (var namespace in namespaces) {
@@ -166,12 +166,12 @@ class NamespaceData {
   final String className;
 
   List<String> get keys =>
-      flattenData.keys.map((e) => "$namespaceName.$e").toList();
+      flattenData.keys.map((e) => '$namespaceName.$e').toList();
 
   int get keyCount => flattenData.length;
 
   NamespaceData(this.data, this.namespaceName)
-      : className = "\$I18nDictionary${namespaceName.capitalize()}",
+      : className = '\$I18nDictionary${namespaceName.capitalize()}',
         flattenData = _flatJson(data, null);
 
   String generateFileContent(String localeName, DartFormatter formatter) {
@@ -181,7 +181,7 @@ class NamespaceData {
     Map<String, _PluralData> plurals = {};
     for (var key in flattenData.keys) {
       List<String> words = key.split(_tempSeparator);
-      String i18nKey = words.join(".");
+      String i18nKey = words.join('.');
 
       var SplitOfLast = words.last.split("-");
       if (SplitOfLast.length == 2) {
@@ -216,12 +216,12 @@ class NamespaceData {
       for (int i = 1; i < words.length; i++) {
         name = name + words[i].capitalize();
       }
-      buffer.writeln("""
+      buffer.writeln('''
       /// key : $namespaceName.$i18nKey
       ///
       /// value ($localeName): ${escapeString(flattenData[key].toString())}
       String get $name => "$namespaceName.$i18nKey";
-      """);
+      ''');
     }
     if (plurals.isNotEmpty) {
       buffer.writeln("/// Plurals\n");
@@ -237,7 +237,7 @@ class NamespaceData {
             'String get ${plural.name} => "$namespaceName.${plural.key}";');
       }
     }
-    buffer.writeln("}");
+    buffer.writeln('}');
     return formatter.format(buffer.toString());
   }
 
@@ -254,7 +254,7 @@ class NamespaceData {
       Map<String, dynamic> data, String? prefix) {
     Map<String, dynamic> result = {};
     var keys = data.keys;
-    for (var key in keys) {
+    for (final key in keys) {
       var value = data[key];
       String newKey = prefix == null ? key : _getTempKey(prefix, key);
       if (value is Map<String, dynamic>) {
@@ -274,6 +274,6 @@ class NamespaceData {
   }
 
   static String _getTempKey(String prefix, String key) {
-    return "$prefix$_tempSeparator$key";
+    return '$prefix$_tempSeparator$key';
   }
 }
