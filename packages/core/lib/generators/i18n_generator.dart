@@ -151,6 +151,14 @@ class LocaleData {
   }
 }
 
+class _PluralData {
+  final String name;
+  final String key;
+  Map<String, String> translation = {};
+
+  _PluralData(this.name, this.key);
+}
+
 class NamespaceData {
   final Map<String, dynamic> data;
   final Map<String, dynamic> flattenData;
@@ -170,9 +178,37 @@ class NamespaceData {
     final buffer = StringBuffer();
     buffer.writeln('class $className {');
     buffer.writeln('const $className();');
+    Map<String, _PluralData> plurals = {};
     for (var key in flattenData.keys) {
       List<String> words = key.split(_tempSeparator);
       String i18nKey = words.join(".");
+
+      var SplitOfLast = words.last.split("-");
+      if (SplitOfLast.length == 2) {
+        // maybe plural
+        int? number = int.tryParse(SplitOfLast[1]);
+        if (number != null || SplitOfLast[1] == 'other') {
+          // is plural
+          for (var separator in _separatorsToRemove) {
+            words = words.expand((e) => e.split(separator)).toList();
+          }
+          words.removeLast();
+          i18nKey = words.join(".");
+          String name = words[0];
+          for (int i = 1; i < words.length; i++) {
+            name = name + words[i].capitalize();
+          }
+          plurals[name] ??= _PluralData(name, i18nKey);
+          if (number != null) {
+            plurals[name]?.translation["$number"] =
+                escapeString(flattenData[key].toString());
+          } else if (SplitOfLast[1] == 'other') {
+            plurals[name]?.translation["other"] =
+                escapeString(flattenData[key].toString());
+          }
+          continue;
+        }
+      }
       for (var separator in _separatorsToRemove) {
         words = words.expand((e) => e.split(separator)).toList();
       }
@@ -186,6 +222,20 @@ class NamespaceData {
       /// value ($localeName): ${escapeString(flattenData[key].toString())}
       String get $name => "$namespaceName.$i18nKey";
       """);
+    }
+    if (plurals.isNotEmpty) {
+      buffer.writeln("/// Plurals\n");
+      for (var plural in plurals.values) {
+        buffer.writeln("""
+      /// key : $namespaceName.${plural.key}
+      ///
+      /// value ($localeName): """);
+        for (var e in plural.translation.entries) {
+          buffer.writeln("///   ${e.key} => ${e.value}");
+        }
+        buffer.writeln(
+            'String get ${plural.name} => "$namespaceName.${plural.key}";');
+      }
     }
     buffer.writeln("}");
     return formatter.format(buffer.toString());
