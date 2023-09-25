@@ -6,7 +6,7 @@ import 'package:flutter_gen_core/utils/error.dart';
 import 'package:flutter_gen_core/utils/map.dart';
 import 'package:flutter_gen_core/utils/version.dart';
 import 'package:path/path.dart';
-import 'package:pretty_json/pretty_json.dart';
+// import 'package:pretty_json/pretty_json.dart';
 import 'package:yaml/yaml.dart';
 
 class Config {
