@@ -2,15 +2,13 @@ import 'package:flutter_gen_core/generators/integrations/integration.dart';
 import 'package:flutter_gen_core/settings/asset_type.dart';
 
 class FlareIntegration extends Integration {
-  FlareIntegration(String packageParameterLiteral)
-      : super(packageParameterLiteral);
+  FlareIntegration(String packageName) : super(packageName);
 
-  String? get packageExpression => packageParameterLiteral.isNotEmpty
-      ? 'packages/$packageParameterLiteral/'
-      : null;
+  String? get packageExpression => isPackage ? 'packages/$packageName/' : null;
 
   @override
   List<String> get requiredImports => [
+        'package:flutter/widgets.dart',
         'package:flare_flutter/flare_actor.dart',
         'package:flare_flutter/flare_controller.dart',
       ];
@@ -22,6 +20,7 @@ class FlareIntegration extends Integration {
   const FlareGenImage(this._assetName);
 
   final String _assetName;
+${isPackage ? "\n  static const String package = '$packageName';" : ''}
 
   FlareActor flare({
     String? boundsNode,
@@ -39,7 +38,7 @@ class FlareIntegration extends Integration {
     bool antialias = true,
   }) {
     return FlareActor(
-      ${packageExpression == null ? '_assetName' : '\'$packageExpression\$_assetName\''},
+      ${isPackage ? '\'$packageExpression\$_assetName\'' : '_assetName'},
       boundsNode: boundsNode,
       animation: animation,
       fit: fit,
@@ -58,17 +57,18 @@ class FlareIntegration extends Integration {
 
   String get path => _assetName;
 
-  String get keyName => ${packageExpression == null ? '_assetName' : '\'$packageExpression\$_assetName\''};
+  String get keyName => ${isPackage ? '\'$packageExpression\$_assetName\'' : '_assetName'};
 }''';
 
   @override
   String get className => 'FlareGenImage';
 
   @override
-  String classInstantiate(String path) => 'FlareGenImage(\'$path\')';
+  String classInstantiate(AssetType asset) =>
+      'FlareGenImage(\'${asset.posixStylePath}\')';
 
   @override
-  bool isSupport(AssetType type) => type.extension == '.flr';
+  bool isSupport(AssetType asset) => asset.extension == '.flr';
 
   @override
   bool get isConstConstructor => true;

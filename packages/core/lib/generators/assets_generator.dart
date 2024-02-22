@@ -6,6 +6,7 @@ import 'package:dart_style/dart_style.dart';
 import 'package:dartx/dartx.dart';
 import 'package:flutter_gen_core/generators/generator_helper.dart';
 import 'package:flutter_gen_core/generators/integrations/flare_integration.dart';
+import 'package:flutter_gen_core/generators/integrations/image_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
 import 'package:flutter_gen_core/generators/integrations/lottie_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/rive_integration.dart';
@@ -60,8 +61,11 @@ String generateAssets(
   final classesBuffer = StringBuffer();
 
   final integrations = <Integration>[
+    ImageIntegration(config.packageParameterLiteral,
+        parseMetadata: config.flutterGen.parseMetadata),
     if (config.flutterGen.integrations.flutterSvg)
-      SvgIntegration(config.packageParameterLiteral),
+      SvgIntegration(config.packageParameterLiteral,
+          parseMetadata: config.flutterGen.parseMetadata),
     if (config.flutterGen.integrations.flareFlutter)
       FlareIntegration(config.packageParameterLiteral),
     if (config.flutterGen.integrations.rive)
@@ -162,11 +166,7 @@ String generateAssets(
     throw 'The value of "flutter_gen/assets/style." is incorrect.';
   }
 
-  classesBuffer.writeln(_assetGenImageClassDefinition(
-    config.packageParameterLiteral,
-  ));
-
-  final imports = <String>{'package:flutter/widgets.dart'};
+  final imports = <String>{};
   integrations
       .where((integration) => integration.isEnabled)
       .forEach((integration) {
@@ -184,6 +184,14 @@ String generateAssets(
   buffer.writeln(importsBuffer.toString());
   buffer.writeln(classesBuffer.toString());
   return formatter.format(buffer.toString());
+}
+
+String? generatePackageNameForConfig(AssetsGenConfig config) {
+  if (config.flutterGen.assets.outputs.packageParameterEnabled) {
+    return config._packageName;
+  } else {
+    return null;
+  }
 }
 
 List<String> _getAssetRelativePathList(
@@ -246,21 +254,11 @@ _Statement? _createAssetTypeStatement(
   String name,
 ) {
   final childAssetAbsolutePath = join(config.rootPath, assetType.path);
-  if (assetType.isSupportedImage) {
-    return _Statement(
-      type: 'AssetGenImage',
-      filePath: assetType.path,
-      name: name,
-      value: 'AssetGenImage(\'${posixStyle(assetType.path)}\')',
-      isConstConstructor: true,
-      isDirectory: false,
-      needDartDoc: true,
-    );
-  } else if (FileSystemEntity.isDirectorySync(childAssetAbsolutePath)) {
+  if (FileSystemEntity.isDirectorySync(childAssetAbsolutePath)) {
     final childClassName = '\$${assetType.path.camelCase().capitalize()}Gen';
     return _Statement(
       type: childClassName,
-      filePath: assetType.path,
+      filePath: assetType.posixStylePath,
       name: name,
       value: '$childClassName()',
       isConstConstructor: true,
@@ -272,13 +270,13 @@ _Statement? _createAssetTypeStatement(
       (element) => element.isSupport(assetType),
     );
     if (integration == null) {
-      var assetKey = posixStyle(assetType.path);
+      var assetKey = assetType.posixStylePath;
       if (config.flutterGen.assets.outputs.packageParameterEnabled) {
         assetKey = 'packages/${config._packageName}/$assetKey';
       }
       return _Statement(
         type: 'String',
-        filePath: assetType.path,
+        filePath: assetType.posixStylePath,
         name: name,
         value: '\'$assetKey\'',
         isConstConstructor: false,
@@ -289,9 +287,9 @@ _Statement? _createAssetTypeStatement(
       integration.isEnabled = true;
       return _Statement(
         type: integration.className,
-        filePath: assetType.path,
+        filePath: assetType.posixStylePath,
         name: name,
-        value: integration.classInstantiate(posixStyle(assetType.path)),
+        value: integration.classInstantiate(assetType),
         isConstConstructor: integration.isConstConstructor,
         isDirectory: false,
         needDartDoc: true,
@@ -349,7 +347,7 @@ String _dotDelimiterStyleDefinition(
         if (dirname(assetType.path) == '.') {
           assetsStaticStatements.add(_Statement(
             type: className,
-            filePath: assetType.path,
+            filePath: assetType.posixStylePath,
             name: assetType.baseName.camelCase(),
             value: '$className()',
             isConstConstructor: true,
@@ -362,8 +360,14 @@ String _dotDelimiterStyleDefinition(
       assetTypeQueue.addAll(assetType.children);
     }
   }
-  buffer.writeln(_dotDelimiterStyleAssetsClassDefinition(
-      className, assetsStaticStatements));
+  final String? packageName = generatePackageNameForConfig(config);
+  buffer.writeln(
+    _dotDelimiterStyleAssetsClassDefinition(
+      className,
+      assetsStaticStatements,
+      packageName,
+    ),
+  );
   return buffer.toString();
 }
 
@@ -424,56 +428,74 @@ String _flatStyleDefinition(
       .whereType<_Statement>()
       .toList();
   final className = config.flutterGen.assets.outputs.className;
-  return _flatStyleAssetsClassDefinition(className, statements);
+  final String? packageName = generatePackageNameForConfig(config);
+  return _flatStyleAssetsClassDefinition(className, statements, packageName);
 }
 
 String _flatStyleAssetsClassDefinition(
   String className,
   List<_Statement> statements,
+  String? packageName,
 ) {
   final statementsBlock =
       statements.map((statement) => '''${statement.toDartDocString()}
            ${statement.toStaticFieldString()}
            ''').join('\n');
-  return _assetsClassDefinition(className, statements, statementsBlock);
+  final valuesBlock = _assetValuesDefinition(statements, static: true);
+  return _assetsClassDefinition(
+    className,
+    statements,
+    statementsBlock,
+    valuesBlock,
+    packageName,
+  );
 }
 
 String _dotDelimiterStyleAssetsClassDefinition(
   String className,
   List<_Statement> statements,
+  String? packageName,
 ) {
   final statementsBlock =
       statements.map((statement) => statement.toStaticFieldString()).join('\n');
-  return _assetsClassDefinition(className, statements, statementsBlock);
+  final valuesBlock = _assetValuesDefinition(statements, static: true);
+  return _assetsClassDefinition(
+    className,
+    statements,
+    statementsBlock,
+    valuesBlock,
+    packageName,
+  );
 }
 
-String _assetValuesDefinition(List<_Statement> statements) {
+String _assetValuesDefinition(
+  List<_Statement> statements, {
+  bool static = false,
+}) {
   final values = statements.where((element) => !element.isDirectory);
   if (values.isEmpty) return '';
   final names = values.map((value) => value.name).join(', ');
-  var type = values.first.type;
-  for (final value in values) {
-    if (type != value.type) {
-      type = 'dynamic';
-      break;
-    }
-  }
+  final type = values.every((element) => element.type == values.first.type)
+      ? values.first.type
+      : 'dynamic';
 
   return '''
   /// List of all assets
-  List<$type> get values => [$names];''';
+  ${static ? 'static ' : ''}List<$type> get values => [$names];''';
 }
 
 String _assetsClassDefinition(
   String className,
   List<_Statement> statements,
   String statementsBlock,
+  String valuesBlock,
+  String? packageName,
 ) {
-  final valuesBlock = _assetValuesDefinition(statements);
   return '''
 class $className {
   $className._();
-  
+${packageName != null ? "\n  static const String package = '$packageName';" : ''}
+
   $statementsBlock
   $valuesBlock
 }
@@ -503,91 +525,6 @@ class $className {
 ''';
 }
 
-String _assetGenImageClassDefinition(String packageName) {
-  final packageParameter = packageName.isNotEmpty ? " = '$packageName'" : '';
-
-  final keyName = packageName.isEmpty
-      ? '_assetName'
-      : "'packages/$packageName/\$_assetName'";
-
-  return '''
-
-class AssetGenImage {
-  const AssetGenImage(this._assetName);
-
-  final String _assetName;
-
-  Image image({
-    Key? key,
-    AssetBundle? bundle,
-    ImageFrameBuilder? frameBuilder,
-    ImageErrorWidgetBuilder? errorBuilder,
-    String? semanticLabel,
-    bool excludeFromSemantics = false,
-    double? scale,
-    double? width,
-    double? height,
-    Color? color,
-    Animation<double>? opacity,
-    BlendMode? colorBlendMode,
-    BoxFit? fit,
-    AlignmentGeometry alignment = Alignment.center,
-    ImageRepeat repeat = ImageRepeat.noRepeat,
-    Rect? centerSlice,
-    bool matchTextDirection = false,
-    bool gaplessPlayback = false,
-    bool isAntiAlias = false,
-    String? package$packageParameter,
-    FilterQuality filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
-  }) {
-    return Image.asset(
-      _assetName,
-      key: key,
-      bundle: bundle,
-      frameBuilder: frameBuilder,
-      errorBuilder: errorBuilder,
-      semanticLabel: semanticLabel,
-      excludeFromSemantics: excludeFromSemantics,
-      scale: scale,
-      width: width,
-      height: height,
-      color: color,
-      opacity: opacity,
-      colorBlendMode: colorBlendMode,
-      fit: fit,
-      alignment: alignment,
-      repeat: repeat,
-      centerSlice: centerSlice,
-      matchTextDirection: matchTextDirection,
-      gaplessPlayback: gaplessPlayback,
-      isAntiAlias: isAntiAlias,
-      package: package,
-      filterQuality: filterQuality,
-      cacheWidth: cacheWidth,
-      cacheHeight: cacheHeight,
-    );
-  }
-
-  ImageProvider provider({
-    AssetBundle? bundle,
-    String? package$packageParameter,
-  }) {
-    return AssetImage(
-      _assetName,
-      bundle: bundle,
-      package: package,
-    );
-  }
-
-  String get path => _assetName;
-
-  String get keyName => $keyName;
-}
-''';
-}
-
 class _Statement {
   const _Statement({
     required this.type,
@@ -607,7 +544,7 @@ class _Statement {
   final bool isDirectory;
   final bool needDartDoc;
 
-  String toDartDocString() => '/// File path: ${posixStyle(filePath)}';
+  String toDartDocString() => '/// File path: $filePath';
 
   String toGetterString() =>
       '$type get $name => ${isConstConstructor ? 'const' : ''} $value;';

@@ -73,6 +73,20 @@ void main() {
           'test_resources/lib/gen/assets_package_parameter.gen.dart';
 
       await expectedAssetsGen(pubspec, generated, fact);
+
+      // The generated classes have `package` fields.
+      final content = await File(generated).readAsString();
+      expect(content, contains("static const String package = 'test';"));
+      expect(
+        content,
+        contains(
+          "@Deprecated('Do not specify package for a generated library asset')",
+        ),
+      );
+      expect(
+        content,
+        contains('String? package = package,'),
+      );
     });
 
     test('Assets with excluded files and directories', () async {
@@ -93,6 +107,28 @@ void main() {
           'test_resources/lib/gen/assets_change_class_name.gen.dart';
 
       await expectedAssetsGen(pubspec, generated, fact);
+    });
+
+    test('Assets with parse metadata enabled', () async {
+      const pubspec = 'test_resources/pubspec_assets_parse_metadata.yaml';
+      const fact = 'test_resources/actual_data/assets_parse_metadata.gen.dart';
+      const generated = 'test_resources/lib/gen/assets_parse_metadata.gen.dart';
+
+      await expectedAssetsGen(pubspec, generated, fact);
+    });
+  });
+
+  group('Test generatePackageNameForConfig', () {
+    test('Assets on pubspec.yaml', () {
+      const pubspec = 'test_resources/pubspec_assets.yaml';
+      const fact = null;
+      expectedPackageNameGen(pubspec, fact);
+    });
+
+    test('Assets with package parameter enabled', () {
+      const pubspec = 'test_resources/pubspec_assets_package_parameter.yaml';
+      const fact = 'test';
+      expectedPackageNameGen(pubspec, fact);
     });
   });
 }

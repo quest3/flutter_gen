@@ -168,6 +168,81 @@ flutter:
 
 These configurations will generate **`assets.gen.dart`** under the **`lib/gen/`** directory by default.
 
+#### Generate for packages
+
+If you want to generate assets for a package,
+use `package_parameter_enabled` under `flutter_gen > assets > outputs`.
+
+```yaml
+flutter_gen:
+  assets:
+    outputs:
+      package_parameter_enabled: true # <- Add this line.
+```
+
+This would add the package constant to the generated class. For example:
+
+```dart
+class Assets {
+  Assets._();
+
+  static const String package = 'test';
+
+  static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
+}
+```
+
+Then you can use assets with the package implicitly or explicitly:
+
+```dart
+// Implicit usage for `Image`/`SvgPicture`/`Lottie`.
+Widget build(BuildContext context) {
+  return Assets.images.icons.paint.svg(
+    width: 120,
+    height: 120,
+  );
+}
+```
+or
+```dart
+// Explicit usage for `Image`/`SvgPicture`/`Lottie`.
+Widget build(BuildContext context) {
+  return SvgPicture.asset(
+    Assets.images.icons.paint.path,
+    package: Assets.package,
+    width: 120,
+    height: 120,
+  );
+}
+```
+
+#### Including additional metadata
+
+At build time, additional metadata may be included in the generated class, by using the
+`parse_metadata` option.
+
+```yaml
+flutter_gen:
+  parse_metadata: true # <- Add this line (default: false)
+```
+
+For image based assets, a new nullable `size` field is added to the
+generated class. For example:
+
+```dart
+AssetGenImage get logo => 
+  const AssetGenImage('assets/images/logo.png', size: Size(209.0, 49.0));
+```
+
+Which can now be used at runtime without parsing the information from the actual asset.
+
+```dart
+Widget build(BuildContext context) {
+  return Assets.images.logo.size!.width;
+}
+```
+
 #### Usage Example
 
 [FlutterGen] generates [Image](https://api.flutter.dev/flutter/widgets/Image-class.html) class if the asset is Flutter supported image format.

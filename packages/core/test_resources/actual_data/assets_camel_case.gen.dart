@@ -63,7 +63,7 @@ class Assets {
       AssetGenImage('pictures/chip5.jpg');
 
   /// List of all assets
-  List<dynamic> get values => [
+  static List<dynamic> get values => [
         imagesChip1,
         imagesChip2,
         imagesChip3Chip3,
@@ -82,9 +82,11 @@ class Assets {
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName);
+  const AssetGenImage(this._assetName, {this.size = null});
 
   final String _assetName;
+
+  final Size? size;
 
   Image image({
     Key? key,

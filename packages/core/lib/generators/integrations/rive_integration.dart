@@ -2,15 +2,13 @@ import 'package:flutter_gen_core/generators/integrations/integration.dart';
 import 'package:flutter_gen_core/settings/asset_type.dart';
 
 class RiveIntegration extends Integration {
-  RiveIntegration(String packageParameterLiteral)
-      : super(packageParameterLiteral);
+  RiveIntegration(String packageName) : super(packageName);
 
-  String? get packageExpression => packageParameterLiteral.isNotEmpty
-      ? 'packages/$packageParameterLiteral/'
-      : null;
+  String? get packageExpression => isPackage ? 'packages/$packageName/' : null;
 
   @override
   List<String> get requiredImports => [
+        'package:flutter/widgets.dart',
         'package:rive/rive.dart',
       ];
 
@@ -21,6 +19,7 @@ class RiveIntegration extends Integration {
   const RiveGenImage(this._assetName);
 
   final String _assetName;
+${isPackage ? "\n  static const String package = '$packageName';" : ''}
 
   RiveAnimation rive({
     String? artboard,
@@ -34,7 +33,7 @@ class RiveIntegration extends Integration {
     OnInitCallback? onInit,
   }) {
     return RiveAnimation.asset(
-      ${packageExpression == null ? '_assetName' : '\'$packageExpression\$_assetName\''},
+      ${isPackage ? '\'$packageExpression\$_assetName\'' : '_assetName'},
       artboard: artboard,
       animations: animations,
       stateMachines: stateMachines,
@@ -49,17 +48,18 @@ class RiveIntegration extends Integration {
 
   String get path => _assetName;
 
-  String get keyName => ${packageExpression == null ? '_assetName' : '\'$packageExpression\$_assetName\''};
+  String get keyName => ${isPackage ? '\'$packageExpression\$_assetName\'' : '_assetName'};
 }''';
 
   @override
   String get className => 'RiveGenImage';
 
   @override
-  String classInstantiate(String path) => 'RiveGenImage(\'$path\')';
+  String classInstantiate(AssetType asset) =>
+      'RiveGenImage(\'${asset.posixStylePath}\')';
 
   @override
-  bool isSupport(AssetType type) => type.extension == '.riv';
+  bool isSupport(AssetType asset) => asset.extension == '.riv';
 
   @override
   bool get isConstConstructor => true;

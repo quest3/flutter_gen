@@ -1,16 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
 import 'package:flutter_gen_core/settings/asset_type.dart';
+import 'package:vector_graphics_compiler/vector_graphics_compiler.dart';
 
 class SvgIntegration extends Integration {
-  SvgIntegration(String packageParameterLiteral)
-      : super(packageParameterLiteral);
+  SvgIntegration(String packageName, {super.parseMetadata})
+      : super(packageName);
 
-  String get packageExpression => packageParameterLiteral.isNotEmpty
-      ? ' = \'$packageParameterLiteral\''
-      : '';
+  String get packageExpression => isPackage ? ' = package' : '';
 
   @override
   List<String> get requiredImports => [
+        'package:flutter/widgets.dart',
         'package:flutter_svg/flutter_svg.dart',
         'package:flutter/services.dart',
       ];
@@ -19,14 +21,18 @@ class SvgIntegration extends Integration {
   String get classOutput => _classDefinition;
 
   String get _classDefinition => '''class SvgGenImage {
-  const SvgGenImage(this._assetName);
+  const SvgGenImage(this._assetName, {this.size = null});
 
   final String _assetName;
+${isPackage ? "\n  static const String package = '$packageName';" : ''}
+
+  final Size? size;
 
   SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
+    ${isPackage ? deprecationMessagePackage : ''}
     String? package$packageExpression,
     double? width,
     double? height,
@@ -68,17 +74,40 @@ class SvgIntegration extends Integration {
 
   String get path => _assetName;
 
-  String get keyName => ${packageParameterLiteral.isEmpty ? '_assetName' : '\'packages/$packageParameterLiteral/\$_assetName\''};
+  String get keyName => ${isPackage ? '\'packages/$packageName/\$_assetName\'' : '_assetName'};
 }''';
 
   @override
   String get className => 'SvgGenImage';
 
   @override
-  String classInstantiate(String path) => 'SvgGenImage(\'$path\')';
+  String classInstantiate(AssetType asset) {
+    // Query extra information about the SVG
+    ImageMetadata? info = parseMetadata ? _getMetadata(asset) : null;
+
+    return 'SvgGenImage(\'${asset.posixStylePath}\''
+        '${(info != null) ? ', size: Size(${info.width}, ${info.height})' : ''}'
+        ')';
+  }
+
+  ImageMetadata? _getMetadata(AssetType asset) {
+    try {
+      // The SVG file is read fully, then parsed with the vector_graphics
+      // library. This is quite a heavy way to extract just the dimenions, but
+      // it's also the same way it will be eventually rendered by Flutter.
+      final svg = File(asset.fullPath).readAsStringSync();
+      final vec = parseWithoutOptimizers(svg);
+      return ImageMetadata(vec.width, vec.height);
+    } catch (e) {
+      stderr.writeln(
+          '[WARNING] Failed to parse SVG \'${asset.path}\' metadata: $e');
+    }
+
+    return null;
+  }
 
   @override
-  bool isSupport(AssetType type) => type.mime == 'image/svg+xml';
+  bool isSupport(AssetType asset) => asset.mime == 'image/svg+xml';
 
   @override
   bool get isConstConstructor => true;

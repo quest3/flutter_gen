@@ -7,8 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 
 class LottieIntegration extends Integration {
-  LottieIntegration(String packageParameterLiteral)
-      : super(packageParameterLiteral);
+  LottieIntegration(String packageName) : super(packageName);
 
   // These are required keys for this integration.
   static const lottieKeys = [
@@ -21,12 +20,11 @@ class LottieIntegration extends Integration {
     'layers', // Must include layers
   ];
 
-  String get packageExpression => packageParameterLiteral.isNotEmpty
-      ? ' = \'$packageParameterLiteral\''
-      : '';
+  String get packageExpression => isPackage ? ' = package' : '';
 
   @override
   List<String> get requiredImports => [
+        'package:flutter/widgets.dart',
         'package:lottie/lottie.dart',
       ];
 
@@ -37,6 +35,7 @@ class LottieIntegration extends Integration {
   const LottieGenImage(this._assetName);
 
   final String _assetName;
+${isPackage ? "\n  static const String package = '$packageName';" : ''}
 
   LottieBuilder lottie({
     Animation<double>? controller,
@@ -56,6 +55,7 @@ class LottieIntegration extends Integration {
     double? height,
     BoxFit? fit,
     AlignmentGeometry? alignment,
+    ${isPackage ? deprecationMessagePackage : ''}
     String? package$packageExpression,
     bool? addRepaintBoundary,
     FilterQuality? filterQuality,
@@ -89,17 +89,18 @@ class LottieIntegration extends Integration {
 
   String get path => _assetName;
 
-  String get keyName => ${packageParameterLiteral.isEmpty ? '_assetName' : '\'packages/$packageParameterLiteral/\$_assetName\''};
+  String get keyName => ${isPackage ? '\'packages/$packageName/\$_assetName\'' : '_assetName'};
 }''';
 
   @override
   String get className => 'LottieGenImage';
 
   @override
-  String classInstantiate(String path) => 'LottieGenImage(\'$path\')';
+  String classInstantiate(AssetType asset) =>
+      'LottieGenImage(\'${asset.posixStylePath}\')';
 
   @override
-  bool isSupport(AssetType type) => isLottieFile(type);
+  bool isSupport(AssetType asset) => isLottieFile(asset);
 
   @override
   bool get isConstConstructor => true;
