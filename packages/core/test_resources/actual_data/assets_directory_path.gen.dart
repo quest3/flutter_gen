@@ -20,14 +20,19 @@ class $AssetsImagesGen {
 
   /// Directory path: assets/images/icons
   $AssetsImagesIconsGen get icons => const $AssetsImagesIconsGen();
+
+  /// Directory path: assets/images
+  String get path => 'assets/images';
 }
 
 class $AssetsUnknownGen {
   const $AssetsUnknownGen();
 
   /// File path: assets/unknown/unknown_mime_type.bk
-  String get unknownMimeType =>
-      'packages/test/assets/unknown/unknown_mime_type.bk';
+  String get unknownMimeType => 'assets/unknown/unknown_mime_type.bk';
+
+  /// Directory path: assets/unknown
+  String get path => 'assets/unknown';
 
   /// List of all assets
   List<String> get values => [unknownMimeType];
@@ -39,6 +44,9 @@ class $AssetsImagesChip3Gen {
   /// File path: assets/images/chip3/chip3.jpg
   AssetGenImage get chip3 =>
       const AssetGenImage('assets/images/chip3/chip3.jpg');
+
+  /// Directory path: assets/images/chip3
+  String get path => 'assets/images/chip3';
 
   /// List of all assets
   List<AssetGenImage> get values => [chip3];
@@ -55,14 +63,15 @@ class $AssetsImagesIconsGen {
   SvgGenImage get fuchsia =>
       const SvgGenImage('assets/images/icons/fuchsia.svg');
 
+  /// Directory path: assets/images/icons
+  String get path => 'assets/images/icons';
+
   /// List of all assets
   List<SvgGenImage> get values => [dartTest, fuchsia];
 }
 
 class Assets {
   Assets._();
-
-  static const String package = 'test';
 
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
@@ -76,8 +85,6 @@ class AssetGenImage {
   });
 
   final String _assetName;
-
-  static const String package = 'test';
 
   final Size? size;
   final Set<String> flavors;
@@ -102,8 +109,7 @@ class AssetGenImage {
     bool matchTextDirection = false,
     bool gaplessPlayback = false,
     bool isAntiAlias = false,
-    @Deprecated('Do not specify package for a generated library asset')
-    String? package = package,
+    String? package,
     FilterQuality filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
@@ -138,8 +144,7 @@ class AssetGenImage {
 
   ImageProvider provider({
     AssetBundle? bundle,
-    @Deprecated('Do not specify package for a generated library asset')
-    String? package = package,
+    String? package,
   }) {
     return AssetImage(
       _assetName,
@@ -150,7 +155,7 @@ class AssetGenImage {
 
   String get path => _assetName;
 
-  String get keyName => 'packages/test/$_assetName';
+  String get keyName => _assetName;
 }
 
 class SvgGenImage {
@@ -171,14 +176,11 @@ class SvgGenImage {
   final Set<String> flavors;
   final bool _isVecFormat;
 
-  static const String package = 'test';
-
   SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
-    @Deprecated('Do not specify package for a generated library asset')
-    String? package = package,
+    String? package,
     double? width,
     double? height,
     BoxFit fit = BoxFit.contain,
@@ -230,5 +232,5 @@ class SvgGenImage {
 
   String get path => _assetName;
 
-  String get keyName => 'packages/test/$_assetName';
+  String get keyName => _assetName;
 }

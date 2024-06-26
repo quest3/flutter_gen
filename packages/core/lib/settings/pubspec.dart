@@ -32,7 +32,7 @@ class Flutter {
   });
 
   @JsonKey(name: 'assets', required: true)
-  final List<String> assets;
+  final List<Object> assets;
 
   @JsonKey(name: 'fonts', required: true)
   final List<FlutterFonts> fonts;
@@ -228,6 +228,7 @@ class FlutterGenElementAssetsOutputs extends FlutterGenElementOutputs {
   FlutterGenElementAssetsOutputs({
     required String className,
     required this.packageParameterEnabled,
+    required this.directoryPathEnabled,
     required this.style,
   }) : super(className: className) {
     if (style != dotDelimiterStyle &&
@@ -237,8 +238,11 @@ class FlutterGenElementAssetsOutputs extends FlutterGenElementOutputs {
     }
   }
 
-  @JsonKey(name: 'package_parameter_enabled', required: true)
+  @JsonKey(name: 'package_parameter_enabled', defaultValue: false)
   final bool packageParameterEnabled;
+
+  @JsonKey(name: 'directory_path_enabled', defaultValue: false)
+  final bool directoryPathEnabled;
 
   @JsonKey(name: 'style', required: true)
   final String style;

@@ -8,8 +8,9 @@
 // ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flare_flutter/flare_controller.dart';
 import 'package:rive/rive.dart';
@@ -34,7 +35,13 @@ class $AssetsImagesGen {
   /// File path: assets/images/chip2.jpg
   AssetGenImage get chip2 => const AssetGenImage('assets/images/chip2.jpg');
 
+  /// Directory path: assets/images/chip3
+  $AssetsImagesChip3Gen get chip3 => const $AssetsImagesChip3Gen();
+
+  /// Directory path: assets/images/chip4
   $AssetsImagesChip4Gen get chip4 => const $AssetsImagesChip4Gen();
+
+  /// Directory path: assets/images/icons
   $AssetsImagesIconsGen get icons => const $AssetsImagesIconsGen();
 
   /// File path: assets/images/logo.png
@@ -81,6 +88,7 @@ class $AssetsLottieGen {
   LottieGenImage get hamburgerArrow =>
       const LottieGenImage('assets/lottie/hamburger_arrow.json');
 
+  /// Directory path: assets/lottie/wrong
   $AssetsLottieWrongGen get wrong => const $AssetsLottieWrongGen();
 
   /// List of all assets
@@ -137,12 +145,25 @@ class $AssetsUnknownGen {
   List<String> get values => [changelog, readme, unknownMimeType];
 }
 
+class $AssetsImagesChip3Gen {
+  const $AssetsImagesChip3Gen();
+
+  /// File path: assets/images/chip3/chip3.jpg
+  AssetGenImage get chip3 =>
+      const AssetGenImage('assets/images/chip3/chip3.jpg');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [chip3];
+}
+
 class $AssetsImagesChip4Gen {
   const $AssetsImagesChip4Gen();
 
   /// File path: assets/images/chip4/chip4.jpg
-  AssetGenImage get chip4 =>
-      const AssetGenImage('assets/images/chip4/chip4.jpg');
+  AssetGenImage get chip4 => const AssetGenImage(
+        'assets/images/chip4/chip4.jpg',
+        flavors: {'extern'},
+      );
 
   /// List of all assets
   List<AssetGenImage> get values => [chip4];
@@ -182,6 +203,7 @@ class $AssetsLottieWrongGen {
 class MyAssets {
   MyAssets._();
 
+  static const String readme = 'README.md';
   static const $AssetsFlareGen flare = $AssetsFlareGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsJsonGen json = $AssetsJsonGen();
@@ -190,14 +212,22 @@ class MyAssets {
   static const $AssetsMovieGen movie = $AssetsMovieGen();
   static const $AssetsRiveGen rive = $AssetsRiveGen();
   static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
+
+  /// List of all assets
+  static List<String> get values => [readme];
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName, {this.size = null});
+  const AssetGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  });
 
   final String _assetName;
 
   final Size? size;
+  final Set<String> flavors;
 
   Image image({
     Key? key,
@@ -269,9 +299,22 @@ class AssetGenImage {
 }
 
 class SvgGenImage {
-  const SvgGenImage(this._assetName);
+  const SvgGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  }) : _isVecFormat = false;
+
+  const SvgGenImage.vec(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  }) : _isVecFormat = true;
 
   final String _assetName;
+  final Size? size;
+  final Set<String> flavors;
+  final bool _isVecFormat;
 
   SvgPicture svg({
     Key? key,
@@ -286,19 +329,32 @@ class SvgGenImage {
     WidgetBuilder? placeholderBuilder,
     String? semanticsLabel,
     bool excludeFromSemantics = false,
-    SvgTheme theme = const SvgTheme(),
+    SvgTheme? theme,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
     @deprecated BlendMode colorBlendMode = BlendMode.srcIn,
     @deprecated bool cacheColorFilter = false,
   }) {
-    return SvgPicture.asset(
-      _assetName,
+    final BytesLoader loader;
+    if (_isVecFormat) {
+      loader = AssetBytesLoader(
+        _assetName,
+        assetBundle: bundle,
+        packageName: package,
+      );
+    } else {
+      loader = SvgAssetLoader(
+        _assetName,
+        assetBundle: bundle,
+        packageName: package,
+        theme: theme,
+      );
+    }
+    return SvgPicture(
+      loader,
       key: key,
       matchTextDirection: matchTextDirection,
-      bundle: bundle,
-      package: package,
       width: width,
       height: height,
       fit: fit,
@@ -307,10 +363,8 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      theme: theme,
-      colorFilter: colorFilter,
-      color: color,
-      colorBlendMode: colorBlendMode,
+      colorFilter: colorFilter ??
+          (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
     );
@@ -322,9 +376,13 @@ class SvgGenImage {
 }
 
 class FlareGenImage {
-  const FlareGenImage(this._assetName);
+  const FlareGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
 
   final String _assetName;
+  final Set<String> flavors;
 
   FlareActor flare({
     String? boundsNode,
@@ -365,9 +423,13 @@ class FlareGenImage {
 }
 
 class RiveGenImage {
-  const RiveGenImage(this._assetName);
+  const RiveGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
 
   final String _assetName;
+  final Set<String> flavors;
 
   RiveAnimation rive({
     String? artboard,
@@ -377,6 +439,7 @@ class RiveGenImage {
     Alignment? alignment,
     Widget? placeHolder,
     bool antialiasing = true,
+    bool useArtboardSize = false,
     List<RiveAnimationController> controllers = const [],
     OnInitCallback? onInit,
   }) {
@@ -389,6 +452,7 @@ class RiveGenImage {
       alignment: alignment,
       placeHolder: placeHolder,
       antialiasing: antialiasing,
+      useArtboardSize: useArtboardSize,
       controllers: controllers,
       onInit: onInit,
     );
@@ -400,9 +464,13 @@ class RiveGenImage {
 }
 
 class LottieGenImage {
-  const LottieGenImage(this._assetName);
+  const LottieGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
 
   final String _assetName;
+  final Set<String> flavors;
 
   LottieBuilder lottie({
     Animation<double>? controller,

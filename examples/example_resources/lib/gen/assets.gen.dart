@@ -8,8 +8,9 @@
 // ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flare_flutter/flare_controller.dart';
 import 'package:rive/rive.dart';
@@ -55,16 +56,25 @@ class $AssetsUnknownGen {
 class ResAssets {
   ResAssets._();
 
+  static const String package = 'example_resources';
+
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
 }
 
 class AssetGenImage {
-  const AssetGenImage(this._assetName, {this.size = null});
+  const AssetGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  });
 
   final String _assetName;
 
+  static const String package = 'example_resources';
+
   final Size? size;
+  final Set<String> flavors;
 
   Image image({
     Key? key,
@@ -86,7 +96,8 @@ class AssetGenImage {
     bool matchTextDirection = false,
     bool gaplessPlayback = false,
     bool isAntiAlias = false,
-    String? package = 'example_resources',
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
     FilterQuality filterQuality = FilterQuality.low,
     int? cacheWidth,
     int? cacheHeight,
@@ -121,7 +132,8 @@ class AssetGenImage {
 
   ImageProvider provider({
     AssetBundle? bundle,
-    String? package = 'example_resources',
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
   }) {
     return AssetImage(
       _assetName,
@@ -136,15 +148,31 @@ class AssetGenImage {
 }
 
 class SvgGenImage {
-  const SvgGenImage(this._assetName);
+  const SvgGenImage(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  }) : _isVecFormat = false;
+
+  const SvgGenImage.vec(
+    this._assetName, {
+    this.size,
+    this.flavors = const {},
+  }) : _isVecFormat = true;
 
   final String _assetName;
+  final Size? size;
+  final Set<String> flavors;
+  final bool _isVecFormat;
+
+  static const String package = 'example_resources';
 
   SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
-    String? package = 'example_resources',
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
     double? width,
     double? height,
     BoxFit fit = BoxFit.contain,
@@ -153,19 +181,32 @@ class SvgGenImage {
     WidgetBuilder? placeholderBuilder,
     String? semanticsLabel,
     bool excludeFromSemantics = false,
-    SvgTheme theme = const SvgTheme(),
+    SvgTheme? theme,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
     @deprecated BlendMode colorBlendMode = BlendMode.srcIn,
     @deprecated bool cacheColorFilter = false,
   }) {
-    return SvgPicture.asset(
-      _assetName,
+    final BytesLoader loader;
+    if (_isVecFormat) {
+      loader = AssetBytesLoader(
+        _assetName,
+        assetBundle: bundle,
+        packageName: package,
+      );
+    } else {
+      loader = SvgAssetLoader(
+        _assetName,
+        assetBundle: bundle,
+        packageName: package,
+        theme: theme,
+      );
+    }
+    return SvgPicture(
+      loader,
       key: key,
       matchTextDirection: matchTextDirection,
-      bundle: bundle,
-      package: package,
       width: width,
       height: height,
       fit: fit,
@@ -174,10 +215,8 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      theme: theme,
-      colorFilter: colorFilter,
-      color: color,
-      colorBlendMode: colorBlendMode,
+      colorFilter: colorFilter ??
+          (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
     );
@@ -189,9 +228,15 @@ class SvgGenImage {
 }
 
 class FlareGenImage {
-  const FlareGenImage(this._assetName);
+  const FlareGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
 
   final String _assetName;
+  final Set<String> flavors;
+
+  static const String package = 'example_resources';
 
   FlareActor flare({
     String? boundsNode,
@@ -232,9 +277,15 @@ class FlareGenImage {
 }
 
 class RiveGenImage {
-  const RiveGenImage(this._assetName);
+  const RiveGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
 
   final String _assetName;
+  final Set<String> flavors;
+
+  static const String package = 'example_resources';
 
   RiveAnimation rive({
     String? artboard,
@@ -244,6 +295,7 @@ class RiveGenImage {
     Alignment? alignment,
     Widget? placeHolder,
     bool antialiasing = true,
+    bool useArtboardSize = false,
     List<RiveAnimationController> controllers = const [],
     OnInitCallback? onInit,
   }) {
@@ -256,6 +308,7 @@ class RiveGenImage {
       alignment: alignment,
       placeHolder: placeHolder,
       antialiasing: antialiasing,
+      useArtboardSize: useArtboardSize,
       controllers: controllers,
       onInit: onInit,
     );
@@ -267,9 +320,15 @@ class RiveGenImage {
 }
 
 class LottieGenImage {
-  const LottieGenImage(this._assetName);
+  const LottieGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
 
   final String _assetName;
+  final Set<String> flavors;
+
+  static const String package = 'example_resources';
 
   LottieBuilder lottie({
     Animation<double>? controller,
@@ -289,7 +348,8 @@ class LottieGenImage {
     double? height,
     BoxFit? fit,
     AlignmentGeometry? alignment,
-    String? package = 'example_resources',
+    @Deprecated('Do not specify package for a generated library asset')
+    String? package = package,
     bool? addRepaintBoundary,
     FilterQuality? filterQuality,
     void Function(String)? onWarning,
