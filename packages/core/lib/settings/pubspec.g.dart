@@ -36,7 +36,7 @@ Flutter _$FlutterFromJson(Map json) => $checkedCreate(
         );
         final val = Flutter(
           assets: $checkedConvert('assets',
-              (v) => (v as List<dynamic>).map((e) => e as String).toList()),
+              (v) => (v as List<dynamic>).map((e) => e as Object).toList()),
           fonts: $checkedConvert(
               'fonts',
               (v) => (v as List<dynamic>)
@@ -81,7 +81,7 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
         );
         final val = FlutterGen(
           output: $checkedConvert('output', (v) => v as String),
-          lineLength: $checkedConvert('line_length', (v) => v as int),
+          lineLength: $checkedConvert('line_length', (v) => (v as num).toInt()),
           parseMetadata: $checkedConvert('parse_metadata', (v) => v as bool),
           assets: $checkedConvert(
               'assets', (v) => FlutterGenAssets.fromJson(v as Map)),
@@ -237,22 +237,21 @@ FlutterGenElementAssetsOutputs _$FlutterGenElementAssetsOutputsFromJson(
       ($checkedConvert) {
         $checkKeys(
           json,
-          requiredKeys: const [
-            'class_name',
-            'package_parameter_enabled',
-            'style'
-          ],
+          requiredKeys: const ['class_name', 'style'],
         );
         final val = FlutterGenElementAssetsOutputs(
           className: $checkedConvert('class_name', (v) => v as String),
-          packageParameterEnabled:
-              $checkedConvert('package_parameter_enabled', (v) => v as bool),
+          packageParameterEnabled: $checkedConvert(
+              'package_parameter_enabled', (v) => v as bool? ?? false),
+          directoryPathEnabled: $checkedConvert(
+              'directory_path_enabled', (v) => v as bool? ?? false),
           style: $checkedConvert('style', (v) => v as String),
         );
         return val;
       },
       fieldKeyMap: const {
         'className': 'class_name',
-        'packageParameterEnabled': 'package_parameter_enabled'
+        'packageParameterEnabled': 'package_parameter_enabled',
+        'directoryPathEnabled': 'directory_path_enabled'
       },
     );
