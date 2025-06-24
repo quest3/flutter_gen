@@ -114,8 +114,10 @@ class $AssetsImagesChip4Gen {
   const $AssetsImagesChip4Gen();
 
   /// File path: assets/images/chip4/chip4.jpg
-  AssetGenImage get chip4 =>
-      const AssetGenImage('assets/images/chip4/chip4.jpg');
+  AssetGenImage get chip4 => const AssetGenImage(
+        'assets/images/chip4/chip4.jpg',
+        flavors: {'test'},
+      );
 
   /// List of all assets
   List<AssetGenImage> get values => [chip4];
@@ -270,6 +272,7 @@ class SvgGenImage {
     String? semanticsLabel,
     bool excludeFromSemantics = false,
     _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
@@ -289,6 +292,7 @@ class SvgGenImage {
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
     return _svg.SvgPicture(

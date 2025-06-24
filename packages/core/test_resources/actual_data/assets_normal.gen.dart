@@ -22,16 +22,6 @@ class $PicturesGen {
   List<AssetGenImage> get values => [chip5];
 }
 
-class $AssetsFlareGen {
-  const $AssetsFlareGen();
-
-  /// File path: assets/flare/Penguin.flr
-  String get penguin => 'assets/flare/Penguin.flr';
-
-  /// List of all assets
-  List<String> get values => [penguin];
-}
-
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
@@ -77,26 +67,6 @@ class $AssetsJsonGen {
 
   /// List of all assets
   List<String> get values => [list, map];
-}
-
-class $AssetsMovieGen {
-  const $AssetsMovieGen();
-
-  /// File path: assets/movie/the_earth.mp4
-  String get theEarth => 'assets/movie/the_earth.mp4';
-
-  /// List of all assets
-  List<String> get values => [theEarth];
-}
-
-class $AssetsUnknownGen {
-  const $AssetsUnknownGen();
-
-  /// File path: assets/unknown/unknown_mime_type.bk
-  String get unknownMimeType => 'assets/unknown/unknown_mime_type.bk';
-
-  /// List of all assets
-  List<String> get values => [unknownMimeType];
 }
 
 class $AssetsImagesChip3Gen {
@@ -145,16 +115,9 @@ class $AssetsImagesIconsGen {
 class Assets {
   const Assets._();
 
-  static const String changelog = 'CHANGELOG.md';
-  static const $AssetsFlareGen flare = $AssetsFlareGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsJsonGen json = $AssetsJsonGen();
-  static const $AssetsMovieGen movie = $AssetsMovieGen();
-  static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
   static const $PicturesGen pictures = $PicturesGen();
-
-  /// List of all assets
-  static List<String> get values => [changelog];
 }
 
 class AssetGenImage {
@@ -270,6 +233,7 @@ class SvgGenImage {
     String? semanticsLabel,
     bool excludeFromSemantics = false,
     _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
@@ -289,6 +253,7 @@ class SvgGenImage {
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
     return _svg.SvgPicture(

@@ -20,9 +20,6 @@ class $AssetsImagesGen {
 
   /// Directory path: assets/images/icons
   $AssetsImagesIconsGen get icons => const $AssetsImagesIconsGen();
-
-  /// Directory path: packages/test/assets/images
-  String get path => 'packages/test/assets/images';
 }
 
 class $AssetsUnknownGen {
@@ -31,9 +28,6 @@ class $AssetsUnknownGen {
   /// File path: assets/unknown/unknown_mime_type.bk
   String get unknownMimeType =>
       'packages/test/assets/unknown/unknown_mime_type.bk';
-
-  /// Directory path: packages/test/assets/unknown
-  String get path => 'packages/test/assets/unknown';
 
   /// List of all assets
   List<String> get values => [unknownMimeType];
@@ -45,9 +39,6 @@ class $AssetsImagesChip3Gen {
   /// File path: assets/images/chip3/chip3.jpg
   AssetGenImage get chip3 =>
       const AssetGenImage('assets/images/chip3/chip3.jpg');
-
-  /// Directory path: packages/test/assets/images/chip3
-  String get path => 'packages/test/assets/images/chip3';
 
   /// List of all assets
   List<AssetGenImage> get values => [chip3];
@@ -63,9 +54,6 @@ class $AssetsImagesIconsGen {
   /// File path: assets/images/icons/fuchsia.svg
   SvgGenImage get fuchsia =>
       const SvgGenImage('assets/images/icons/fuchsia.svg');
-
-  /// Directory path: packages/test/assets/images/icons
-  String get path => 'packages/test/assets/images/icons';
 
   /// List of all assets
   List<SvgGenImage> get values => [dartTest, fuchsia];
@@ -200,6 +188,7 @@ class SvgGenImage {
     String? semanticsLabel,
     bool excludeFromSemantics = false,
     _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
@@ -219,6 +208,7 @@ class SvgGenImage {
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
     return _svg.SvgPicture(

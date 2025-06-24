@@ -22,17 +22,6 @@ class $AssetsImagesGen {
   $AssetsImagesIconsGen get icons => const $AssetsImagesIconsGen();
 }
 
-class $AssetsUnknownGen {
-  const $AssetsUnknownGen();
-
-  /// File path: assets/unknown/unknown_mime_type.bk
-  String get unknownMimeType =>
-      'packages/test/assets/unknown/unknown_mime_type.bk';
-
-  /// List of all assets
-  List<String> get values => [unknownMimeType];
-}
-
 class $AssetsImagesChip3Gen {
   const $AssetsImagesChip3Gen();
 
@@ -65,7 +54,6 @@ class Assets {
   static const String package = 'test';
 
   static const $AssetsImagesGen images = $AssetsImagesGen();
-  static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
 }
 
 class AssetGenImage {
@@ -188,6 +176,7 @@ class SvgGenImage {
     String? semanticsLabel,
     bool excludeFromSemantics = false,
     _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
@@ -207,6 +196,7 @@ class SvgGenImage {
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
     return _svg.SvgPicture(

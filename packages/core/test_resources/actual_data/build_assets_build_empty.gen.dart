@@ -10,9 +10,17 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart' as _svg;
-import 'package:lottie/lottie.dart' as _lottie;
-import 'package:rive/rive.dart' as _rive;
 import 'package:vector_graphics/vector_graphics.dart' as _vg;
+
+class $PicturesGen {
+  const $PicturesGen();
+
+  /// File path: pictures/chip5.jpg
+  AssetGenImage get chip5 => const AssetGenImage('pictures/chip5.jpg');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [chip5];
+}
 
 class $AssetsFlareGen {
   const $AssetsFlareGen();
@@ -71,59 +79,6 @@ class $AssetsJsonGen {
   List<String> get values => [list, map];
 }
 
-class $AssetsLottieGen {
-  const $AssetsLottieGen();
-
-  /// File path: assets/lottie/XuiIZ9X1Rf.lottie
-  LottieGenImage get xuiIZ9X1Rf =>
-      const LottieGenImage('assets/lottie/XuiIZ9X1Rf.lottie');
-
-  /// File path: assets/lottie/alarm-clock-lottie-v440.json
-  LottieGenImage get alarmClockLottieV440 =>
-      const LottieGenImage('assets/lottie/alarm-clock-lottie-v440.json');
-
-  /// File path: assets/lottie/cat.tgs
-  LottieGenImage get cat => const LottieGenImage('assets/lottie/cat.tgs');
-
-  /// File path: assets/lottie/geometrical-animation.json
-  LottieGenImage get geometricalAnimation =>
-      const LottieGenImage('assets/lottie/geometrical-animation.json');
-
-  /// File path: assets/lottie/hamburger_arrow.json
-  LottieGenImage get hamburgerArrow =>
-      const LottieGenImage('assets/lottie/hamburger_arrow.json');
-
-  /// File path: assets/lottie/spinning_carrousel.zip
-  LottieGenImage get spinningCarrousel =>
-      const LottieGenImage('assets/lottie/spinning_carrousel.zip');
-
-  /// Directory path: assets/lottie/wrong
-  $AssetsLottieWrongGen get wrong => const $AssetsLottieWrongGen();
-
-  /// List of all assets
-  List<LottieGenImage> get values => [
-        xuiIZ9X1Rf,
-        alarmClockLottieV440,
-        cat,
-        geometricalAnimation,
-        hamburgerArrow,
-        spinningCarrousel
-      ];
-}
-
-class $AssetsMixGen {
-  const $AssetsMixGen();
-
-  /// File path: assets/mix/aaa.jpg
-  AssetGenImage get aaa => const AssetGenImage('assets/mix/aaa.jpg');
-
-  /// File path: assets/mix/unknown_mime_type.bk
-  String get unknownMimeType => 'assets/mix/unknown_mime_type.bk';
-
-  /// List of all assets
-  List<dynamic> get values => [aaa, unknownMimeType];
-}
-
 class $AssetsMovieGen {
   const $AssetsMovieGen();
 
@@ -134,30 +89,14 @@ class $AssetsMovieGen {
   List<String> get values => [theEarth];
 }
 
-class $AssetsRiveGen {
-  const $AssetsRiveGen();
-
-  /// File path: assets/rive/vehicles.riv
-  RiveGenImage get vehicles => const RiveGenImage('assets/rive/vehicles.riv');
-
-  /// List of all assets
-  List<RiveGenImage> get values => [vehicles];
-}
-
 class $AssetsUnknownGen {
   const $AssetsUnknownGen();
-
-  /// File path: assets/unknown/CHANGELOG.md
-  String get changelog => 'assets/unknown/CHANGELOG.md';
-
-  /// File path: assets/unknown/README.md
-  String get readme => 'assets/unknown/README.md';
 
   /// File path: assets/unknown/unknown_mime_type.bk
   String get unknownMimeType => 'assets/unknown/unknown_mime_type.bk';
 
   /// List of all assets
-  List<String> get values => [changelog, readme, unknownMimeType];
+  List<String> get values => [unknownMimeType];
 }
 
 class $AssetsImagesChip3Gen {
@@ -175,10 +114,8 @@ class $AssetsImagesChip4Gen {
   const $AssetsImagesChip4Gen();
 
   /// File path: assets/images/chip4/chip4.jpg
-  AssetGenImage get chip4 => const AssetGenImage(
-        'assets/images/chip4/chip4.jpg',
-        flavors: {'extern'},
-      );
+  AssetGenImage get chip4 =>
+      const AssetGenImage('assets/images/chip4/chip4.jpg');
 
   /// List of all assets
   List<AssetGenImage> get values => [chip4];
@@ -205,34 +142,19 @@ class $AssetsImagesIconsGen {
   List<SvgGenImage> get values => [dartTest, fuchsia, kmm, paint];
 }
 
-class $AssetsLottieWrongGen {
-  const $AssetsLottieWrongGen();
+class Assets {
+  const Assets._();
 
-  /// File path: assets/lottie/wrong/dummy.zip
-  String get dummy => 'assets/lottie/wrong/dummy.zip';
-
-  /// File path: assets/lottie/wrong/rocket-lottie-v439.json
-  String get rocketLottieV439 => 'assets/lottie/wrong/rocket-lottie-v439.json';
-
-  /// List of all assets
-  List<String> get values => [dummy, rocketLottieV439];
-}
-
-class MyAssets {
-  const MyAssets._();
-
-  static const String readme = 'README.md';
+  static const String changelog = 'CHANGELOG.md';
   static const $AssetsFlareGen flare = $AssetsFlareGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsJsonGen json = $AssetsJsonGen();
-  static const $AssetsLottieGen lottie = $AssetsLottieGen();
-  static const $AssetsMixGen mix = $AssetsMixGen();
   static const $AssetsMovieGen movie = $AssetsMovieGen();
-  static const $AssetsRiveGen rive = $AssetsRiveGen();
   static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
+  static const $PicturesGen pictures = $PicturesGen();
 
   /// List of all assets
-  static List<String> get values => [readme];
+  static List<String> get values => [changelog];
 }
 
 class AssetGenImage {
@@ -387,120 +309,6 @@ class SvgGenImage {
           (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
-    );
-  }
-
-  String get path => _assetName;
-
-  String get keyName => _assetName;
-}
-
-class RiveGenImage {
-  const RiveGenImage(
-    this._assetName, {
-    this.flavors = const {},
-  });
-
-  final String _assetName;
-  final Set<String> flavors;
-
-  _rive.RiveAnimation rive({
-    String? artboard,
-    List<String> animations = const [],
-    List<String> stateMachines = const [],
-    BoxFit? fit,
-    Alignment? alignment,
-    Widget? placeHolder,
-    bool antialiasing = true,
-    bool useArtboardSize = false,
-    List<_rive.RiveAnimationController> controllers = const [],
-    _rive.OnInitCallback? onInit,
-  }) {
-    return _rive.RiveAnimation.asset(
-      _assetName,
-      artboard: artboard,
-      animations: animations,
-      stateMachines: stateMachines,
-      fit: fit,
-      alignment: alignment,
-      placeHolder: placeHolder,
-      antialiasing: antialiasing,
-      useArtboardSize: useArtboardSize,
-      controllers: controllers,
-      onInit: onInit,
-    );
-  }
-
-  String get path => _assetName;
-
-  String get keyName => _assetName;
-}
-
-class LottieGenImage {
-  const LottieGenImage(
-    this._assetName, {
-    this.flavors = const {},
-  });
-
-  final String _assetName;
-  final Set<String> flavors;
-
-  _lottie.LottieBuilder lottie({
-    Animation<double>? controller,
-    bool? animate,
-    _lottie.FrameRate? frameRate,
-    bool? repeat,
-    bool? reverse,
-    _lottie.LottieDelegates? delegates,
-    _lottie.LottieOptions? options,
-    void Function(_lottie.LottieComposition)? onLoaded,
-    _lottie.LottieImageProviderFactory? imageProviderFactory,
-    Key? key,
-    AssetBundle? bundle,
-    Widget Function(
-      BuildContext,
-      Widget,
-      _lottie.LottieComposition?,
-    )? frameBuilder,
-    ImageErrorWidgetBuilder? errorBuilder,
-    double? width,
-    double? height,
-    BoxFit? fit,
-    AlignmentGeometry? alignment,
-    String? package,
-    bool? addRepaintBoundary,
-    FilterQuality? filterQuality,
-    void Function(String)? onWarning,
-    _lottie.LottieDecoder? decoder,
-    _lottie.RenderCache? renderCache,
-    bool? backgroundLoading,
-  }) {
-    return _lottie.Lottie.asset(
-      _assetName,
-      controller: controller,
-      animate: animate,
-      frameRate: frameRate,
-      repeat: repeat,
-      reverse: reverse,
-      delegates: delegates,
-      options: options,
-      onLoaded: onLoaded,
-      imageProviderFactory: imageProviderFactory,
-      key: key,
-      bundle: bundle,
-      frameBuilder: frameBuilder,
-      errorBuilder: errorBuilder,
-      width: width,
-      height: height,
-      fit: fit,
-      alignment: alignment,
-      package: package,
-      addRepaintBoundary: addRepaintBoundary,
-      filterQuality: filterQuality,
-      onWarning: onWarning,
-      decoder: decoder,
-      renderCache: renderCache,
-      backgroundLoading: backgroundLoading,
     );
   }
 

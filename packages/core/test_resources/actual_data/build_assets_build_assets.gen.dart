@@ -16,8 +16,7 @@ class $PicturesGen {
   const $PicturesGen();
 
   /// File path: pictures/chip5.jpg
-  AssetGenImage get chip5 =>
-      const AssetGenImage('pictures/chip5.jpg', size: Size(600.0, 403.0));
+  AssetGenImage get chip5 => const AssetGenImage('pictures/chip5.jpg');
 
   /// List of all assets
   List<AssetGenImage> get values => [chip5];
@@ -37,8 +36,7 @@ class $AssetsImagesGen {
   const $AssetsImagesGen();
 
   /// File path: assets/images/chip1.jpg
-  AssetGenImage get chip1 =>
-      const AssetGenImage('assets/images/chip1.jpg', size: Size(600.0, 403.0));
+  AssetGenImage get chip1 => const AssetGenImage('assets/images/chip1.jpg');
 
   /// File path: assets/images/chip2.jpg
   AssetGenImage get chip2 => const AssetGenImage('assets/images/chip2.jpg');
@@ -53,20 +51,16 @@ class $AssetsImagesGen {
   $AssetsImagesIconsGen get icons => const $AssetsImagesIconsGen();
 
   /// File path: assets/images/logo.png
-  AssetGenImage get logo =>
-      const AssetGenImage('assets/images/logo.png', size: Size(209.0, 49.0));
+  AssetGenImage get logo => const AssetGenImage('assets/images/logo.png');
 
   /// File path: assets/images/profile.jpg
-  AssetGenImage get profileJpg =>
-      const AssetGenImage('assets/images/profile.jpg');
+  AssetGenImage get profileJpg => const AssetGenImage('assets/images/profile.jpg');
 
   /// File path: assets/images/profile.png
-  AssetGenImage get profilePng =>
-      const AssetGenImage('assets/images/profile.png');
+  AssetGenImage get profilePng => const AssetGenImage('assets/images/profile.png');
 
   /// List of all assets
-  List<AssetGenImage> get values =>
-      [chip1, chip2, logo, profileJpg, profilePng];
+  List<AssetGenImage> get values => [chip1, chip2, logo, profileJpg, profilePng];
 }
 
 class $AssetsJsonGen {
@@ -106,9 +100,7 @@ class $AssetsImagesChip3Gen {
   const $AssetsImagesChip3Gen();
 
   /// File path: assets/images/chip3/chip3.jpg
-  AssetGenImage get chip3 =>
-      const AssetGenImage('assets/images/chip3/chip3.jpg',
-          size: Size(600.0, 403.0));
+  AssetGenImage get chip3 => const AssetGenImage('assets/images/chip3/chip3.jpg');
 
   /// List of all assets
   List<AssetGenImage> get values => [chip3];
@@ -118,9 +110,7 @@ class $AssetsImagesChip4Gen {
   const $AssetsImagesChip4Gen();
 
   /// File path: assets/images/chip4/chip4.jpg
-  AssetGenImage get chip4 =>
-      const AssetGenImage('assets/images/chip4/chip4.jpg',
-          size: Size(600.0, 403.0));
+  AssetGenImage get chip4 => const AssetGenImage('assets/images/chip4/chip4.jpg');
 
   /// List of all assets
   List<AssetGenImage> get values => [chip4];
@@ -130,40 +120,34 @@ class $AssetsImagesIconsGen {
   const $AssetsImagesIconsGen();
 
   /// File path: assets/images/icons/dart@test.svg
-  SvgGenImage get dartTest =>
-      const SvgGenImage('assets/images/icons/dart@test.svg',
-          size: Size(512.001, 512.001));
+  SvgGenImage get dartTest => const SvgGenImage('assets/images/icons/dart@test.svg');
 
   /// File path: assets/images/icons/fuchsia.svg
-  SvgGenImage get fuchsia =>
-      const SvgGenImage('assets/images/icons/fuchsia.svg',
-          size: Size(50.0, 50.0));
-
-  /// File path: assets/images/icons/invalid.svg
-  SvgGenImage get invalid =>
-      const SvgGenImage('assets/images/icons/invalid.svg');
+  SvgGenImage get fuchsia => const SvgGenImage('assets/images/icons/fuchsia.svg');
 
   /// File path: assets/images/icons/kmm.svg
-  SvgGenImage get kmm => const SvgGenImage('assets/images/icons/kmm.svg',
-      size: Size(755.0, 310.0));
+  SvgGenImage get kmm => const SvgGenImage('assets/images/icons/kmm.svg');
 
   /// File path: assets/images/icons/paint.svg
-  SvgGenImage get paint => const SvgGenImage('assets/images/icons/paint.svg',
-      size: Size(472.0, 392.0));
+  SvgGenImage get paint => const SvgGenImage('assets/images/icons/paint.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [dartTest, fuchsia, invalid, kmm, paint];
+  List<SvgGenImage> get values => [dartTest, fuchsia, kmm, paint];
 }
 
 class Assets {
   const Assets._();
 
+  static const String changelog = 'CHANGELOG.md';
   static const $AssetsFlareGen flare = $AssetsFlareGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsJsonGen json = $AssetsJsonGen();
   static const $AssetsMovieGen movie = $AssetsMovieGen();
   static const $AssetsUnknownGen unknown = $AssetsUnknownGen();
   static const $PicturesGen pictures = $PicturesGen();
+
+  /// List of all assets
+  static List<String> get values => [changelog];
 }
 
 class AssetGenImage {
@@ -279,6 +263,7 @@ class SvgGenImage {
     String? semanticsLabel,
     bool excludeFromSemantics = false,
     _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
@@ -298,6 +283,7 @@ class SvgGenImage {
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
     return _svg.SvgPicture(
@@ -312,8 +298,7 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      colorFilter: colorFilter ??
-          (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
+      colorFilter: colorFilter ?? (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
     );
