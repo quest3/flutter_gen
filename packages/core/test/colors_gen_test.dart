@@ -1,4 +1,3 @@
-@TestOn('vm')
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
@@ -24,24 +23,40 @@ void main() {
       final pubspec = File('test_resources/pubspec_colors_no_inputs.yaml');
       final config = loadPubspecConfig(pubspec);
       final formatter = DartFormatter(
-          pageWidth: config.pubspec.flutterGen.lineLength, lineEnding: '\n');
+        languageVersion: dartFormatterLanguageVersion,
+        pageWidth: config.pubspec.flutterGen.lineLength,
+        lineEnding: '\n',
+      );
 
-      expect(() {
-        return generateColors(
-            pubspec, formatter, config.pubspec.flutterGen.colors);
-      }, throwsA(isA<InvalidSettingsException>()));
+      expect(
+        () => generateColors(
+          pubspec,
+          formatter,
+          config.pubspec.flutterGen.colors,
+        ),
+        throwsA(isA<InvalidSettingsException>()),
+      );
     });
 
     test('Wrong colors settings on pubspec.yaml', () async {
       final pubspec = File('test_resources/pubspec_colors_no_inputs_list.yaml');
       final config = loadPubspecConfig(pubspec);
       final formatter = DartFormatter(
-          pageWidth: config.pubspec.flutterGen.lineLength, lineEnding: '\n');
+        languageVersion: dartFormatterLanguageVersion,
+        pageWidth: config.pubspec.flutterGen.lineLength,
+        lineEnding: '\n',
+      );
 
-      expect(() {
-        return generateColors(
-            pubspec, formatter, config.pubspec.flutterGen.colors);
-      }, throwsA(isA<InvalidSettingsException>()));
+      expect(
+        () {
+          return generateColors(
+            pubspec,
+            formatter,
+            config.pubspec.flutterGen.colors,
+          );
+        },
+        throwsA(isA<InvalidSettingsException>()),
+      );
     });
 
     test('ColorPath Tests', () async {

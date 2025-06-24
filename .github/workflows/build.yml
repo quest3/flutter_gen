@@ -16,50 +16,40 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: wasabeef/import-asdf-tool-versions-action@v1.0.1
+      - uses: wasabeef/import-asdf-tool-versions-action@v1.0.3
         id: asdf
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ steps.asdf.outputs.flutter }}
           channel: stable
           cache: true
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ steps.asdf.outputs.dart }}
 
-      - name: Set environment
+      - name: Set environment for MacOS & Ubuntu
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
-      - name: Set environment
+      - name: Set environment for Windows
         if: startsWith(matrix.os, 'windows')
         run: echo "%LOCALAPPDATA%\Pub\Cache\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Get dependencies for macos and ubuntu
-        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+      - name: Get dependencies
         run: |
           dart pub global activate melos
           melos bootstrap
 
-      - name: Get dependencies for Windows
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          dart pub global activate melos
-          # FIXME: CI randomly fail
-          melos exec -c 1 -- flutter pub get
-          melos bootstrap
-
-      - name: Run tests for our dart project.
+      - name: Run tests for Dart packages
         if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          melos test
+        run: melos test:dart --no-select
+
+      - name: Run tests for Flutter packages
+        if: startsWith(matrix.os, 'ubuntu')
+        run: melos test:flutter --no-select
 
       - name: Run coverage
         if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          melos coverage
+        run: melos coverage
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./packages/core/coverage.lcov

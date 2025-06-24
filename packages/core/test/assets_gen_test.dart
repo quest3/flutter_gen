@@ -1,9 +1,9 @@
-@TestOn('vm')
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
 import 'package:dartx/dartx.dart';
 import 'package:flutter_gen_core/generators/assets_generator.dart';
+import 'package:flutter_gen_core/generators/generator_helper.dart';
 import 'package:flutter_gen_core/settings/asset_type.dart';
 import 'package:flutter_gen_core/settings/config.dart';
 import 'package:flutter_gen_core/utils/error.dart';
@@ -60,12 +60,18 @@ void main() {
       final pubspec = File('test_resources/pubspec_assets_no_list.yaml');
       final config = loadPubspecConfig(pubspec);
       final formatter = DartFormatter(
-          pageWidth: config.pubspec.flutterGen.lineLength, lineEnding: '\n');
+        languageVersion: dartFormatterLanguageVersion,
+        pageWidth: config.pubspec.flutterGen.lineLength,
+        lineEnding: '\n',
+      );
 
-      expect(() {
-        return generateAssets(
-            AssetsGenConfig.fromConfig(pubspec, config), formatter);
-      }, throwsA(isA<InvalidSettingsException>()));
+      expect(
+        () => generateAssets(
+          AssetsGenConfig.fromConfig(pubspec, config),
+          formatter,
+        ),
+        throwsA(isA<InvalidSettingsException>()),
+      );
     });
 
     test('Assets with package parameter enabled', () async {
@@ -96,6 +102,16 @@ void main() {
       const pubspec = 'test_resources/pubspec_assets_directory_path.yaml';
       const fact = 'test_resources/actual_data/assets_directory_path.gen.dart';
       const generated = 'test_resources/lib/gen/assets_directory_path.gen.dart';
+      await expectedAssetsGen(pubspec, generated, fact);
+    });
+
+    test('Assets with directory path and package parameter enabled', () async {
+      const pubspec =
+          'test_resources/pubspec_assets_directory_path_with_package_parameter.yaml';
+      const fact =
+          'test_resources/actual_data/assets_directory_path_with_package_parameter.gen.dart';
+      const generated =
+          'test_resources/lib/gen/assets_directory_path_with_package_parameter.gen.dart';
       await expectedAssetsGen(pubspec, generated, fact);
     });
 
@@ -214,6 +230,57 @@ void main() {
       final names = got.map((e) => e.name);
       expect(names.sorted(), tests.values.sorted());
     });
+
+    test(
+      'Assets on pubspec_assets.yaml and override with build_assets.yaml ',
+      () async {
+        const pubspec = 'test_resources/pubspec_assets.yaml';
+        const build = 'test_resources/build_assets.yaml';
+        const fact = 'test_resources/actual_data/build_assets.gen.dart';
+        const generated = 'test_resources/lib/build_gen/assets.gen.dart';
+
+        await expectedAssetsGen(pubspec, generated, fact, build: build);
+      },
+    );
+
+    test(
+      'Assets on pubspec_assets.yaml and override with build_runner_assets.yaml ',
+      () async {
+        const pubspec = 'test_resources/pubspec_assets.yaml';
+        const build = 'test_resources/build_runner_assets.yaml';
+        const fact = 'test_resources/actual_data/build_runner_assets.gen.dart';
+        const generated = 'test_resources/lib/build_gen/assets.gen.dart';
+
+        await expectedAssetsGen(pubspec, generated, fact, build: build);
+      },
+    );
+
+    test(
+      'Assets on pubspec_assets.yaml and override with build_empty.yaml ',
+      () async {
+        const pubspec = 'test_resources/pubspec_assets.yaml';
+        const build = 'test_resources/build_empty.yaml';
+        const fact = 'test_resources/actual_data/build_empty.gen.dart';
+        const generated = 'test_resources/lib/build_gen/assets.gen.dart';
+
+        await expectedAssetsGen(pubspec, generated, fact, build: build);
+      },
+    );
+
+    test('fallback to build.yaml if valid', () async {
+      const pubspec = 'test_resources/pubspec_assets.yaml';
+      const fact = 'test_resources/actual_data/build_assets.gen.dart';
+      const generated = 'test_resources/lib/build_gen/assets.gen.dart';
+
+      final buildFile = File('build.yaml');
+      final originalBuildContent = buildFile.readAsStringSync();
+      buildFile.writeAsStringSync(
+        File('test_resources/build_assets.yaml').readAsStringSync(),
+      );
+      await expectedAssetsGen(pubspec, generated, fact).whenComplete(() {
+        buildFile.writeAsStringSync(originalBuildContent);
+      });
+    });
   });
 
   group('Test generatePackageNameForConfig', () {
@@ -227,6 +294,39 @@ void main() {
       const pubspec = 'test_resources/pubspec_assets_package_parameter.yaml';
       const fact = 'test';
       expectedPackageNameGen(pubspec, fact);
+    });
+  });
+
+  group('gen helper', () {
+    test('build deprecations', () {
+      expect(
+        sBuildDeprecation(
+          'style',
+          'asset',
+          'asset.output',
+          'https://github.com/FlutterGen/flutter_gen/pull/294',
+          [
+            '  assets:',
+            '    outputs:',
+            '      style: snake-case',
+          ],
+        ),
+        equals('''
+┌─────────────────────────────────────────────────────────────────┐
+| ⚠️ Error                                                        |
+| The style option has been moved from `asset` to `asset.output`. |
+| It should be changed in the `pubspec.yaml`.                     |
+| https://github.com/FlutterGen/flutter_gen/pull/294              |
+|                                                                 |
+| ```yaml                                                         |
+| flutter_gen:                                                    |
+|   assets:                                                       |
+|     outputs:                                                    |
+|       style: snake-case                                         |
+| ```                                                             |
+└─────────────────────────────────────────────────────────────────┘
+'''),
+      );
     });
   });
 }

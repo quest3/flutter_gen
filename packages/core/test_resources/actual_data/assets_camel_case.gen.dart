@@ -10,7 +10,7 @@
 import 'package:flutter/widgets.dart';
 
 class Assets {
-  Assets._();
+  const Assets._();
 
   /// File path: assets/images/chip1.jpg
   static const AssetGenImage imagesChip1 =
@@ -111,10 +111,10 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
     String? package,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) {

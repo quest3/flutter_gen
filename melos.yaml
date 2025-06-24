@@ -9,28 +9,27 @@ ide:
   intellij:
     enabled: true
     moduleNamePrefix: ''
-  vscode: true
 
 command:
   clean:
     hooks:
       post:
-        run: |
-          melos exec -c 6 -- flutter clean
+        run: flutter clean
+        exec:
+          concurrency: 1
         description: flutter clean
 
 scripts:
-  get:
-    run: |
-      melos exec -c 6 -- flutter pub get
-    description: flutter pub get
-
   upgrade:
-    run: melos exec -c 6 -- flutter pub upgrade
-    description: flutter pub upgrade
+    run: dart pub upgrade
+    exec:
+      concurrency: 1
+    packageFilters:
+      flutter: false
+    description: dart pub upgrade
 
   analyze:
-    run: melos exec -c 6 -- flutter analyze
+    exec: flutter analyze
     description: flutter analyze
 
   format:
@@ -53,28 +52,33 @@ scripts:
     description: dart run build_runner build --delete-conflicting-outputs
 
   gen:examples:command:
-    exec: dart ../../packages/command/bin/flutter_gen_command.dart --config pubspec.yaml
+    exec: dart ../../packages/command/bin/flutter_gen_command.dart
     packageFilters:
-      scope: 
+      scope:
         - example
         - example_resources
-    description: dart ../../packages/command/bin/flutter_gen_command.dart --config pubspec.yaml
+    description: dart ../../packages/command/bin/flutter_gen_command.dart
 
   gen:examples:build_runner:
-    exec: flutter pub run build_runner build --delete-conflicting-outputs
+    run: flutter pub run build_runner build --delete-conflicting-outputs
+    exec:
+      concurrency: 1
     packageFilters:
-      scope: 
+      scope:
         - example
         - example_resources
     description: flutter pub run build_runner build --delete-conflicting-outputs
 
   test:
-    run: melos test:dart --no-select && melos test:flutter --no-select
+    run: |
+      melos test:dart --no-select
+      melos test:flutter --no-select
     description: dart & flutter test
 
   test:dart:
-    run: dart test
+    run: dart test --concurrency=1
     exec:
+      concurrency: 1
       failFast: true
     packageFilters:
       flutter: false
@@ -82,8 +86,9 @@ scripts:
     description: dart test
 
   test:flutter:
-    run: flutter test
+    run: flutter test --concurrency=1
     exec:
+      concurrency: 1
       failFast: true
     packageFilters:
       flutter: true
@@ -94,3 +99,25 @@ scripts:
     run: |
       bash ./scripts/coverage.sh packages/core
     description: bash ./scripts/coverage.sh packages/core
+
+  publish:force:
+    run: dart pub publish -f
+    exec:
+      concurrency: 1
+      failFast: true
+    packageFilters:
+      scope:
+        - flutter_gen
+        - flutter_gen_core
+        - flutter_gen_runner
+
+  publish:dry:
+    run: dart pub publish --dry-run
+    exec:
+      concurrency: 1
+      failFast: true
+    packageFilters:
+      scope:
+        - flutter_gen
+        - flutter_gen_core
+        - flutter_gen_runner

@@ -3,15 +3,13 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dart_style/dart_style.dart';
-import 'package:dartx/dartx.dart';
+import 'package:dartx/dartx.dart' hide IterableSorted;
 import 'package:flutter_gen_core/generators/generator_helper.dart';
-import 'package:flutter_gen_core/generators/integrations/flare_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/image_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
 import 'package:flutter_gen_core/generators/integrations/lottie_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/rive_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/svg_integration.dart';
-import 'package:flutter_gen_core/settings/asset_type.dart';
 import 'package:flutter_gen_core/settings/config.dart';
 import 'package:flutter_gen_core/settings/flavored_asset.dart';
 import 'package:flutter_gen_core/settings/pubspec.dart';
@@ -50,137 +48,104 @@ class AssetsGenConfig {
       flutterGen.assets.outputs.packageParameterEnabled ? _packageName : '';
 }
 
-String generateAssets(
+Future<String> generateAssets(
   AssetsGenConfig config,
   DartFormatter formatter,
-) {
+) async {
   if (config.assets.isEmpty) {
     throw const InvalidSettingsException(
-        'The value of "flutter/assets:" is incorrect.');
+      'The value of "flutter/assets:" is incorrect.',
+    );
+  }
+
+  final integrations = <Integration>[
+    if (config.flutterGen.integrations.image)
+      ImageIntegration(
+        config.packageParameterLiteral,
+        parseMetadata: config.flutterGen.parseMetadata,
+      ),
+    if (config.flutterGen.integrations.flutterSvg)
+      SvgIntegration(
+        config.packageParameterLiteral,
+        parseMetadata: config.flutterGen.parseMetadata,
+      ),
+    if (config.flutterGen.integrations.rive)
+      RiveIntegration(
+        config.packageParameterLiteral,
+      ),
+    if (config.flutterGen.integrations.lottie)
+      LottieIntegration(
+        config.packageParameterLiteral,
+      ),
+  ];
+
+  // Warn for deprecated configs.
+  final deprecatedStyle = config.flutterGen.assets.style != null;
+  final deprecatedPackageParam =
+      config.flutterGen.assets.packageParameterEnabled != null;
+  if (deprecatedStyle || deprecatedPackageParam) {
+    final deprecationBuffer = StringBuffer();
+    deprecationBuffer.writeln(sDeprecationHeader);
+    if (deprecatedStyle) {
+      deprecationBuffer.writeln(
+        sBuildDeprecation(
+          'style',
+          'asset',
+          'asset.output',
+          'https://github.com/FlutterGen/flutter_gen/pull/294',
+          [
+            '  assets:',
+            '    outputs:',
+            '      style: snake-case',
+          ],
+        ),
+      );
+    }
+    if (deprecatedPackageParam) {
+      deprecationBuffer.writeln(
+        sBuildDeprecation(
+          'package_parameter_enabled',
+          'asset',
+          'asset.output',
+          'https://github.com/FlutterGen/flutter_gen/pull/294',
+          [
+            '  assets:',
+            '    outputs:',
+            '      package_parameter_enabled: true',
+          ],
+        ),
+      );
+    }
+    throw InvalidSettingsException(deprecationBuffer.toString());
+  }
+
+  final classesBuffer = StringBuffer();
+  final _StyleDefinition definition;
+  switch (config.flutterGen.assets.outputs.style) {
+    case FlutterGenElementAssetsOutputsStyle.dotDelimiterStyle:
+      definition = _dotDelimiterStyleDefinition;
+      break;
+    case FlutterGenElementAssetsOutputsStyle.snakeCaseStyle:
+      definition = _snakeCaseStyleDefinition;
+      break;
+    case FlutterGenElementAssetsOutputsStyle.camelCaseStyle:
+      definition = _camelCaseStyleDefinition;
+      break;
+  }
+  classesBuffer.writeln(await definition(config, integrations));
+
+  final imports = <Import>{};
+  for (final integration in integrations.where((e) => e.isEnabled)) {
+    imports.addAll(integration.requiredImports);
+    classesBuffer.writeln(integration.classOutput);
   }
 
   final importsBuffer = StringBuffer();
-  final classesBuffer = StringBuffer();
-
-  final integrations = <Integration>[
-    ImageIntegration(config.packageParameterLiteral,
-        parseMetadata: config.flutterGen.parseMetadata),
-    if (config.flutterGen.integrations.flutterSvg)
-      SvgIntegration(config.packageParameterLiteral,
-          parseMetadata: config.flutterGen.parseMetadata),
-    if (config.flutterGen.integrations.flareFlutter)
-      FlareIntegration(config.packageParameterLiteral),
-    if (config.flutterGen.integrations.rive)
-      RiveIntegration(config.packageParameterLiteral),
-    if (config.flutterGen.integrations.lottie)
-      LottieIntegration(config.packageParameterLiteral),
-  ];
-
-  // ignore: deprecated_member_use_from_same_package
-  final deprecatedStyle = config.flutterGen.assets.style != null;
-  final deprecatedPackageParam =
-      // ignore: deprecated_member_use_from_same_package
-      config.flutterGen.assets.packageParameterEnabled != null;
-  if (deprecatedStyle || deprecatedPackageParam) {
-    stderr.writeln('''
-                                                                                        
-                ░░░░                                                                    
-                                                                                        
-                                            ██                                          
-                                          ██░░██                                        
-  ░░          ░░                        ██░░░░░░██                            ░░░░      
-                                      ██░░░░░░░░░░██                                    
-                                      ██░░░░░░░░░░██                                    
-                                    ██░░░░░░░░░░░░░░██                                  
-                                  ██░░░░░░██████░░░░░░██                                
-                                  ██░░░░░░██████░░░░░░██                                
-                                ██░░░░░░░░██████░░░░░░░░██                              
-                                ██░░░░░░░░██████░░░░░░░░██                              
-                              ██░░░░░░░░░░██████░░░░░░░░░░██                            
-                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██                          
-                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██                          
-                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██                        
-                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██                        
-                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██                      
-                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██                      
-                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██                    
-        ░░            ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██                    
-                        ██████████████████████████████████████████                      
-                                                                                        
-                                                                                        
-                  ░░''');
-  }
-  if (deprecatedStyle && deprecatedPackageParam) {
-    stderr.writeln('''
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ ⚠️  Warning                                                                                     │
-    │   The `style` and `package_parameter_enabled` property moved from asset to under asset.output. │
-    │   It should be changed in the following pubspec.yaml.                                          │
-    │   https://github.com/FlutterGen/flutter_gen/pull/294                                           │
-    │                                                                                                │
-    │ [pubspec.yaml]                                                                                 │
-    │                                                                                                │
-    │  flutter_gen:                                                                                  │
-    │    assets:                                                                                     │
-    │      outputs:                                                                                  │
-    │        style: snake-case                                                                       │
-    │        package_parameter_enabled: true                                                         │
-    └────────────────────────────────────────────────────────────────────────────────────────────────┘''');
-  } else if (deprecatedStyle) {
-    stderr.writeln('''
-    ┌───────────────────────────────────────────────────────────────────────┐
-    │ ⚠️  Warning                                                            │
-    │   The `style` property moved from asset to under asset.output.        │
-    │   It should be changed in the following ways                          │
-    │   https://github.com/FlutterGen/flutter_gen/pull/294                  │
-    │                                                                       │
-    │ [pubspec.yaml]                                                        │
-    │                                                                       │
-    │  flutter_gen:                                                         │
-    │    assets:                                                            │
-    │      outputs:                                                         │
-    │        style: snake-case                                              │
-    └───────────────────────────────────────────────────────────────────────┘''');
-  } else if (deprecatedPackageParam) {
-    stderr.writeln('''
-    ┌────────────────────────────────────────────────────────────────────────────────────────┐
-    │ ⚠️  Warning                                                                             │
-    │   The `package_parameter_enabled` property moved from asset to under asset.output.     │
-    │   It should be changed in the following pubspec.yaml.                                  │
-    │   https://github.com/FlutterGen/flutter_gen/pull/294                                   │
-    │                                                                                        │
-    │ [pubspec.yaml]                                                                         │
-    │                                                                                        │
-    │  flutter_gen:                                                                          │
-    │    assets:                                                                             │
-    │      outputs:                                                                          │
-    │        package_parameter_enabled: true                                                 │
-    └────────────────────────────────────────────────────────────────────────────────────────┘''');
-  }
-
-  if (config.flutterGen.assets.outputs.isDotDelimiterStyle) {
-    classesBuffer.writeln(_dotDelimiterStyleDefinition(config, integrations));
-  } else if (config.flutterGen.assets.outputs.isSnakeCaseStyle) {
-    classesBuffer.writeln(_snakeCaseStyleDefinition(config, integrations));
-  } else if (config.flutterGen.assets.outputs.isCamelCaseStyle) {
-    classesBuffer.writeln(_camelCaseStyleDefinition(config, integrations));
-  } else {
-    throw 'The value of "flutter_gen/assets/style." is incorrect.';
-  }
-
-  final imports = <String>{};
-  integrations
-      .where((integration) => integration.isEnabled)
-      .forEach((integration) {
-    imports.addAll(integration.requiredImports);
-    classesBuffer.writeln(integration.classOutput);
-  });
-  for (final package in imports) {
-    importsBuffer.writeln(import(package));
+  for (final e in imports.sorted((a, b) => a.import.compareTo(b.import))) {
+    importsBuffer.writeln(import(e));
   }
 
   final buffer = StringBuffer();
-
   buffer.writeln(header);
   buffer.writeln(ignore);
   buffer.writeln(importsBuffer.toString());
@@ -242,13 +207,16 @@ List<FlavoredAsset> _getAssetRelativePathList(
     }
     final assetAbsolutePath = join(rootPath, tempAsset.path);
     if (FileSystemEntity.isDirectorySync(assetAbsolutePath)) {
-      assetRelativePathList.addAll(Directory(assetAbsolutePath)
-          .listSync()
-          .whereType<File>()
-          .map(
-            (e) => tempAsset.copyWith(path: relative(e.path, from: rootPath)),
-          )
-          .toList());
+      assetRelativePathList.addAll(
+        Directory(assetAbsolutePath)
+            .listSync()
+            .whereType<File>()
+            .map(
+              (file) =>
+                  tempAsset.copyWith(path: relative(file.path, from: rootPath)),
+            )
+            .toList(),
+      );
     } else if (FileSystemEntity.isFileSync(assetAbsolutePath)) {
       assetRelativePathList.add(
         tempAsset.copyWith(path: relative(assetAbsolutePath, from: rootPath)),
@@ -293,11 +261,11 @@ AssetType _constructAssetTree(
   return assetTypeMap['.']!;
 }
 
-_Statement? _createAssetTypeStatement(
+Future<_Statement?> _createAssetTypeStatement(
   AssetsGenConfig config,
   UniqueAssetType assetType,
   List<Integration> integrations,
-) {
+) async {
   final childAssetAbsolutePath = join(config.rootPath, assetType.path);
   if (FileSystemEntity.isDirectorySync(childAssetAbsolutePath)) {
     final childClassName = '\$${assetType.path.camelCase().capitalize()}Gen';
@@ -311,9 +279,20 @@ _Statement? _createAssetTypeStatement(
       needDartDoc: false,
     );
   } else if (!assetType.isIgnoreFile) {
-    final integration = integrations.firstWhereOrNull(
-      (element) => element.isSupport(assetType),
-    );
+    Integration? integration;
+    for (final element in integrations) {
+      final call = element.isSupport(assetType);
+      final bool isSupport;
+      if (call is Future<bool>) {
+        isSupport = await call;
+      } else {
+        isSupport = call;
+      }
+      if (isSupport) {
+        integration = element;
+        break;
+      }
+    }
     if (integration == null) {
       var assetKey = assetType.posixStylePath;
       if (config.flutterGen.assets.outputs.packageParameterEnabled) {
@@ -345,24 +324,24 @@ _Statement? _createAssetTypeStatement(
 }
 
 /// Generate style like Assets.foo.bar
-String _dotDelimiterStyleDefinition(
+Future<String> _dotDelimiterStyleDefinition(
   AssetsGenConfig config,
   List<Integration> integrations,
-) {
+) async {
   final rootPath = Directory(config.rootPath).absolute.uri.toFilePath();
-  final buffer = StringBuffer();
-  final className = config.flutterGen.assets.outputs.className;
+  final packageName = generatePackageNameForConfig(config);
+  final outputs = config.flutterGen.assets.outputs;
   final assetRelativePathList = _getAssetRelativePathList(
     rootPath,
     config.assets,
     config.exclude,
   );
-  final assetsStaticStatements = <_Statement>[];
-
   final assetTypeQueue = ListQueue<AssetType>.from(
     _constructAssetTree(assetRelativePathList, rootPath).children,
   );
 
+  final assetsStaticStatements = <_Statement>[];
+  final buffer = StringBuffer();
   while (assetTypeQueue.isNotEmpty) {
     final assetType = assetTypeQueue.removeFirst();
     String assetPath = join(rootPath, assetType.path);
@@ -377,62 +356,58 @@ String _dotDelimiterStyleDefinition(
         File(assetPath).parent.absolute.uri.toFilePath() == rootPath;
     // Handles directories, and explicitly handles root path assets.
     if (isDirectory || isRootAsset) {
-      final statements = assetType.children
-          .mapToUniqueAssetType(camelCase, justBasename: true)
-          .map(
-            (e) => _createAssetTypeStatement(
-              config,
-              e,
-              integrations,
-            ),
-          )
-          .whereType<_Statement>()
-          .toList();
+      final List<_Statement?> results = await Future.wait(
+        assetType.children
+            .mapToUniqueAssetType(camelCase, justBasename: true)
+            .map((e) => _createAssetTypeStatement(config, e, integrations)),
+      );
+      final statements = results.whereType<_Statement>().toList();
 
       if (assetType.isDefaultAssetsDirectory) {
         assetsStaticStatements.addAll(statements);
       } else if (!isDirectory && isRootAsset) {
         // Creates explicit statement.
-        assetsStaticStatements.add(
-          _createAssetTypeStatement(
-            config,
-            UniqueAssetType(assetType: assetType, style: camelCase),
-            integrations,
-          )!,
+        final statement = await _createAssetTypeStatement(
+          config,
+          UniqueAssetType(assetType: assetType, style: camelCase),
+          integrations,
         );
+        assetsStaticStatements.add(statement!);
       } else {
         final className = '\$${assetType.path.camelCase().capitalize()}Gen';
+        String? directoryPath;
+        if (outputs.directoryPathEnabled) {
+          directoryPath = assetType.posixStylePath;
+          if (packageName != null) {
+            directoryPath = 'packages/$packageName/$directoryPath';
+          }
+        }
         buffer.writeln(
-          _directoryClassGenDefinition(
-            className,
-            statements,
-            config.flutterGen.assets.outputs.directoryPathEnabled
-                ? assetType.posixStylePath
-                : null,
-          ),
+          _directoryClassGenDefinition(className, statements, directoryPath),
         );
         // Add this directory reference to Assets class
         // if we are not under the default asset folder
         if (dirname(assetType.path) == '.') {
-          assetsStaticStatements.add(_Statement(
-            type: className,
-            filePath: assetType.posixStylePath,
-            name: assetType.baseName.camelCase(),
-            value: '$className()',
-            isConstConstructor: true,
-            isDirectory: true,
-            needDartDoc: true,
-          ));
+          assetsStaticStatements.add(
+            _Statement(
+              type: className,
+              filePath: assetType.posixStylePath,
+              name: assetType.baseName.camelCase(),
+              value: '$className()',
+              isConstConstructor: true,
+              isDirectory: true,
+              needDartDoc: true,
+            ),
+          );
         }
       }
 
       assetTypeQueue.addAll(assetType.children);
     }
   }
-  final String? packageName = generatePackageNameForConfig(config);
   buffer.writeln(
     _dotDelimiterStyleAssetsClassDefinition(
-      className,
+      outputs.className,
       assetsStaticStatements,
       packageName,
     ),
@@ -440,20 +415,13 @@ String _dotDelimiterStyleDefinition(
   return buffer.toString();
 }
 
-/// Generate style like Assets.fooBar
-String _camelCaseStyleDefinition(
+typedef _StyleDefinition = Future<String> Function(
   AssetsGenConfig config,
   List<Integration> integrations,
-) {
-  return _flatStyleDefinition(
-    config,
-    integrations,
-    camelCase,
-  );
-}
+);
 
 /// Generate style like Assets.foo_bar
-String _snakeCaseStyleDefinition(
+Future<String> _snakeCaseStyleDefinition(
   AssetsGenConfig config,
   List<Integration> integrations,
 ) {
@@ -464,35 +432,48 @@ String _snakeCaseStyleDefinition(
   );
 }
 
-String _flatStyleDefinition(
+/// Generate style like Assets.fooBar
+Future<String> _camelCaseStyleDefinition(
+  AssetsGenConfig config,
+  List<Integration> integrations,
+) {
+  return _flatStyleDefinition(
+    config,
+    integrations,
+    camelCase,
+  );
+}
+
+Future<String> _flatStyleDefinition(
   AssetsGenConfig config,
   List<Integration> integrations,
   String Function(String) style,
-) {
+) async {
   final List<FlavoredAsset> paths = _getAssetRelativePathList(
     config.rootPath,
     config.assets,
     config.exclude,
   );
   paths.sort(((a, b) => a.path.compareTo(b.path)));
-  final statements = paths
-      .map(
-        (assetPath) => AssetType(
-          rootPath: config.rootPath,
-          path: assetPath.path,
-          flavors: assetPath.flavors,
+  final List<_Statement?> results = await Future.wait(
+    paths
+        .map(
+          (assetPath) => AssetType(
+            rootPath: config.rootPath,
+            path: assetPath.path,
+            flavors: assetPath.flavors,
+          ),
+        )
+        .mapToUniqueAssetType(style)
+        .map(
+          (e) => _createAssetTypeStatement(
+            config,
+            e,
+            integrations,
+          ),
         ),
-      )
-      .mapToUniqueAssetType(style)
-      .map(
-        (e) => _createAssetTypeStatement(
-          config,
-          e,
-          integrations,
-        ),
-      )
-      .whereType<_Statement>()
-      .toList();
+  );
+  final statements = results.whereType<_Statement>().toList();
   final className = config.flutterGen.assets.outputs.className;
   final String? packageName = generatePackageNameForConfig(config);
   return _flatStyleAssetsClassDefinition(className, statements, packageName);
@@ -503,10 +484,13 @@ String _flatStyleAssetsClassDefinition(
   List<_Statement> statements,
   String? packageName,
 ) {
-  final statementsBlock =
-      statements.map((statement) => '''${statement.toDartDocString()}
+  final statementsBlock = statements
+      .map(
+        (statement) => '''${statement.toDartDocString()}
            ${statement.toStaticFieldString()}
-           ''').join('\n');
+           ''',
+      )
+      .join('\n');
   final valuesBlock = _assetValuesDefinition(statements, static: true);
   return _assetsClassDefinition(
     className,
@@ -539,7 +523,9 @@ String _assetValuesDefinition(
   bool static = false,
 }) {
   final values = statements.where((element) => !element.isDirectory);
-  if (values.isEmpty) return '';
+  if (values.isEmpty) {
+    return '';
+  }
   final names = values.map((value) => value.name).join(', ');
   final type = values.every((element) => element.type == values.first.type)
       ? values.first.type
@@ -559,7 +545,7 @@ String _assetsClassDefinition(
 ) {
   return '''
 class $className {
-  $className._();
+  const $className._();
 ${packageName != null ? "\n  static const String package = '$packageName';" : ''}
 
   $statementsBlock

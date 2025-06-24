@@ -1,10 +1,7 @@
-@TestOn('vm')
-import 'package:flutter_gen_core/generators/integrations/flare_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
 import 'package:flutter_gen_core/generators/integrations/lottie_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/rive_integration.dart';
 import 'package:flutter_gen_core/generators/integrations/svg_integration.dart';
-import 'package:flutter_gen_core/settings/asset_type.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -28,17 +25,28 @@ class TestIntegration extends Integration {
   }
 
   @override
-  List<String> get requiredImports => [];
+  List<Import> get requiredImports => [];
 }
 
 void main() {
   group('Test Assets Integration generator', () {
     final resPath = p.absolute('test_resources');
+
     test('Assets with No integrations on pubspec.yaml', () async {
       const pubspec = 'test_resources/pubspec_assets_no_integrations.yaml';
       const fact = 'test_resources/actual_data/assets_no_integrations.gen.dart';
       const generated =
           'test_resources/lib/gen/assets_no_integrations.gen.dart';
+
+      await expectedAssetsGen(pubspec, generated, fact);
+    });
+
+    test('Assets with no image integration', () async {
+      const pubspec = 'test_resources/pubspec_assets_no_image_integration.yaml';
+      const fact =
+          'test_resources/actual_data/assets_no_image_integration.gen.dart';
+      const generated =
+          'test_resources/lib/gen/assets_no_image_integration.gen.dart';
 
       await expectedAssetsGen(pubspec, generated, fact);
     });
@@ -137,58 +145,6 @@ void main() {
         integrationWithPackage.classOutput.contains(
           "static const String package = 'package_name';",
         ),
-        isTrue,
-      );
-    });
-
-    test('Assets with Flare integrations on pubspec.yaml', () async {
-      const pubspec = 'test_resources/pubspec_assets_flare_integrations.yaml';
-      const fact =
-          'test_resources/actual_data/assets_flare_integrations.gen.dart';
-      const generated =
-          'test_resources/lib/gen/assets_flare_integrations.gen.dart';
-
-      await expectedAssetsGen(pubspec, generated, fact);
-
-      final integration = FlareIntegration('');
-      expect(integration.className, 'FlareGenImage');
-      expect(
-        integration.classInstantiate(
-          AssetType(
-            rootPath: resPath,
-            path: 'assets/path',
-            flavors: {},
-          ),
-        ),
-        'FlareGenImage(\'assets/path\')',
-      );
-      expect(
-        integration.isSupport(
-          AssetType(
-            rootPath: resPath,
-            path: 'assets/path/dog.flr',
-            flavors: {},
-          ),
-        ),
-        isTrue,
-      );
-      expect(
-        integration.isSupport(
-          AssetType(
-            rootPath: resPath,
-            path: 'assets/path/dog.json',
-            flavors: {},
-          ),
-        ),
-        isFalse,
-      );
-      expect(integration.isConstConstructor, isTrue);
-      expect(integration.classOutput.contains('_assetName,'), isTrue);
-
-      final integrationWithPackage = FlareIntegration('package_name');
-      expect(
-        integrationWithPackage.classOutput
-            .contains('\'packages/package_name/\$_assetName\','),
         isTrue,
       );
     });

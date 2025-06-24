@@ -1,4 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_gen_core/settings/asset_type.dart';
+import 'package:flutter_gen_core/settings/import.dart';
+
+export 'package:flutter_gen_core/settings/asset_type.dart';
+export 'package:flutter_gen_core/settings/import.dart';
 
 /// A base class for all integrations. An integration is a class that
 /// generates code for a specific asset type.
@@ -13,14 +19,14 @@ abstract class Integration {
 
   final bool parseMetadata;
 
-  List<String> get requiredImports;
+  List<Import> get requiredImports;
 
   String get classOutput;
 
   String get className;
 
   /// Is this asset type supported by this integration?
-  bool isSupport(AssetType asset);
+  FutureOr<bool> isSupport(AssetType asset);
 
   bool get isConstConstructor;
 
@@ -49,8 +55,8 @@ const String deprecationMessagePackage =
 /// Currently only contains the width and height, but could contain more in
 /// future.
 class ImageMetadata {
+  const ImageMetadata(this.width, this.height);
+
   final double width;
   final double height;
-
-  const ImageMetadata(this.width, this.height);
 }

@@ -1,4 +1,3 @@
-@TestOn('vm')
 import 'dart:io';
 
 import 'package:dart_style/dart_style.dart';
@@ -11,26 +10,39 @@ import 'package:flutter_gen_core/settings/config.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
+final dartFormatterLanguageVersion = DartFormatter.latestLanguageVersion;
+
 Future<void> clearTestResults() async {}
 
 Future<List<String>> runAssetsGen(
   String pubspec,
   String generated,
-  String fact,
-) async {
+  String fact, {
+  String? build,
+}) async {
+  stdout.writeln('[DEBUG] test: Generate from config...');
+  final pubspecFile = File(pubspec);
+
+  File? buildFile;
+  if (build != null) {
+    buildFile = File(build);
+  }
+
   await FlutterGenerator(
-    File(pubspec),
+    pubspecFile,
+    buildFile: buildFile,
     assetsName: p.basename(generated),
   ).build();
 
-  final pubspecFile = File(pubspec);
-  final config = loadPubspecConfig(pubspecFile);
+  stdout.writeln('[DEBUG] test: Generate from API...');
+  final config = loadPubspecConfig(pubspecFile, buildFile: buildFile);
   final formatter = DartFormatter(
+    languageVersion: dartFormatterLanguageVersion,
     pageWidth: config.pubspec.flutterGen.lineLength,
     lineEnding: '\n',
   );
 
-  final actual = generateAssets(
+  final actual = await generateAssets(
     AssetsGenConfig.fromConfig(pubspecFile, config),
     formatter,
   );
@@ -70,9 +82,10 @@ Future<void> expectedI18nGen(
 Future<void> expectedAssetsGen(
   String pubspec,
   String generated,
-  String fact,
-) async {
-  final results = await runAssetsGen(pubspec, generated, fact);
+  String fact, {
+  String? build,
+}) async {
+  final results = await runAssetsGen(pubspec, generated, fact, build: build);
   final actual = results.first, expected = results.last;
   expect(
     File(generated).readAsStringSync(),
@@ -94,6 +107,7 @@ Future<List<String>> runColorsGen(
   final pubspecFile = File(pubspec);
   final config = loadPubspecConfig(pubspecFile);
   final formatter = DartFormatter(
+    languageVersion: dartFormatterLanguageVersion,
     pageWidth: config.pubspec.flutterGen.lineLength,
     lineEnding: '\n',
   );
@@ -137,14 +151,14 @@ Future<List<String>> runFontsGen(
   final pubspecFile = File(pubspec);
   final config = loadPubspecConfig(pubspecFile);
   final formatter = DartFormatter(
+    languageVersion: dartFormatterLanguageVersion,
     pageWidth: config.pubspec.flutterGen.lineLength,
     lineEnding: '\n',
   );
 
   final actual = generateFonts(
+    FontsGenConfig.fromConfig(config),
     formatter,
-    config.pubspec.flutter.fonts,
-    config.pubspec.flutterGen.fonts,
   );
   final expected = formatter.format(
     File(fact).readAsStringSync().replaceAll('\r\n', '\n'),
