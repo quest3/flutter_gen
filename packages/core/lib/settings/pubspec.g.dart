@@ -76,6 +76,7 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
             'parse_metadata',
             'assets',
             'fonts',
+            'i18n',
             'integrations',
             'colors'
           ],
