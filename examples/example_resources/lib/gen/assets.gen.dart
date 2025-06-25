@@ -7,24 +7,25 @@
 // ignore_for_file: type=lint
 // ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:vector_graphics/vector_graphics.dart';
-import 'package:flare_flutter/flare_actor.dart';
-import 'package:flare_flutter/flare_controller.dart';
-import 'package:rive/rive.dart';
-import 'package:lottie/lottie.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart' as _svg;
+import 'package:lottie/lottie.dart' as _lottie;
+import 'package:rive/rive.dart' as _rive;
+import 'package:vector_graphics/vector_graphics.dart' as _vg;
 
 class $AssetsImagesGen {
   const $AssetsImagesGen();
+
+  /// File path: assets/images/cat.tgs
+  LottieGenImage get cat => const LottieGenImage('assets/images/cat.tgs');
 
   /// File path: assets/images/dart.svg
   SvgGenImage get dart => const SvgGenImage('assets/images/dart.svg');
 
   /// File path: assets/images/favorite.flr
-  FlareGenImage get favorite =>
-      const FlareGenImage('assets/images/favorite.flr');
+  String get favorite =>
+      'packages/example_resources/assets/images/favorite.flr';
 
   /// File path: assets/images/flutter3.jpg
   AssetGenImage get flutter3 =>
@@ -39,7 +40,7 @@ class $AssetsImagesGen {
 
   /// List of all assets
   List<dynamic> get values =>
-      [dart, favorite, flutter3, runningCarOnRoad, skills];
+      [cat, dart, favorite, flutter3, runningCarOnRoad, skills];
 }
 
 class $AssetsUnknownGen {
@@ -54,7 +55,7 @@ class $AssetsUnknownGen {
 }
 
 class ResAssets {
-  ResAssets._();
+  const ResAssets._();
 
   static const String package = 'example_resources';
 
@@ -94,11 +95,11 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
     @Deprecated('Do not specify package for a generated library asset')
     String? package = package,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) {
@@ -167,7 +168,7 @@ class SvgGenImage {
 
   static const String package = 'example_resources';
 
-  SvgPicture svg({
+  _svg.SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
@@ -181,29 +182,31 @@ class SvgGenImage {
     WidgetBuilder? placeholderBuilder,
     String? semanticsLabel,
     bool excludeFromSemantics = false,
-    SvgTheme? theme,
+    _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
     @deprecated BlendMode colorBlendMode = BlendMode.srcIn,
     @deprecated bool cacheColorFilter = false,
   }) {
-    final BytesLoader loader;
+    final _svg.BytesLoader loader;
     if (_isVecFormat) {
-      loader = AssetBytesLoader(
+      loader = _vg.AssetBytesLoader(
         _assetName,
         assetBundle: bundle,
         packageName: package,
       );
     } else {
-      loader = SvgAssetLoader(
+      loader = _svg.SvgAssetLoader(
         _assetName,
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
-    return SvgPicture(
+    return _svg.SvgPicture(
       loader,
       key: key,
       matchTextDirection: matchTextDirection,
@@ -227,55 +230,6 @@ class SvgGenImage {
   String get keyName => 'packages/example_resources/$_assetName';
 }
 
-class FlareGenImage {
-  const FlareGenImage(
-    this._assetName, {
-    this.flavors = const {},
-  });
-
-  final String _assetName;
-  final Set<String> flavors;
-
-  static const String package = 'example_resources';
-
-  FlareActor flare({
-    String? boundsNode,
-    String? animation,
-    BoxFit fit = BoxFit.contain,
-    Alignment alignment = Alignment.center,
-    bool isPaused = false,
-    bool snapToEnd = false,
-    FlareController? controller,
-    FlareCompletedCallback? callback,
-    Color? color,
-    bool shouldClip = true,
-    bool sizeFromArtboard = false,
-    String? artboard,
-    bool antialias = true,
-  }) {
-    return FlareActor(
-      'packages/example_resources/$_assetName',
-      boundsNode: boundsNode,
-      animation: animation,
-      fit: fit,
-      alignment: alignment,
-      isPaused: isPaused,
-      snapToEnd: snapToEnd,
-      controller: controller,
-      callback: callback,
-      color: color,
-      shouldClip: shouldClip,
-      sizeFromArtboard: sizeFromArtboard,
-      artboard: artboard,
-      antialias: antialias,
-    );
-  }
-
-  String get path => _assetName;
-
-  String get keyName => 'packages/example_resources/$_assetName';
-}
-
 class RiveGenImage {
   const RiveGenImage(
     this._assetName, {
@@ -287,7 +241,7 @@ class RiveGenImage {
 
   static const String package = 'example_resources';
 
-  RiveAnimation rive({
+  _rive.RiveAnimation rive({
     String? artboard,
     List<String> animations = const [],
     List<String> stateMachines = const [],
@@ -296,10 +250,10 @@ class RiveGenImage {
     Widget? placeHolder,
     bool antialiasing = true,
     bool useArtboardSize = false,
-    List<RiveAnimationController> controllers = const [],
-    OnInitCallback? onInit,
+    List<_rive.RiveAnimationController> controllers = const [],
+    _rive.OnInitCallback? onInit,
   }) {
-    return RiveAnimation.asset(
+    return _rive.RiveAnimation.asset(
       'packages/example_resources/$_assetName',
       artboard: artboard,
       animations: animations,
@@ -330,19 +284,23 @@ class LottieGenImage {
 
   static const String package = 'example_resources';
 
-  LottieBuilder lottie({
+  _lottie.LottieBuilder lottie({
     Animation<double>? controller,
     bool? animate,
-    FrameRate? frameRate,
+    _lottie.FrameRate? frameRate,
     bool? repeat,
     bool? reverse,
-    LottieDelegates? delegates,
-    LottieOptions? options,
-    void Function(LottieComposition)? onLoaded,
-    LottieImageProviderFactory? imageProviderFactory,
+    _lottie.LottieDelegates? delegates,
+    _lottie.LottieOptions? options,
+    void Function(_lottie.LottieComposition)? onLoaded,
+    _lottie.LottieImageProviderFactory? imageProviderFactory,
     Key? key,
     AssetBundle? bundle,
-    Widget Function(BuildContext, Widget, LottieComposition?)? frameBuilder,
+    Widget Function(
+      BuildContext,
+      Widget,
+      _lottie.LottieComposition?,
+    )? frameBuilder,
     ImageErrorWidgetBuilder? errorBuilder,
     double? width,
     double? height,
@@ -353,8 +311,11 @@ class LottieGenImage {
     bool? addRepaintBoundary,
     FilterQuality? filterQuality,
     void Function(String)? onWarning,
+    _lottie.LottieDecoder? decoder,
+    _lottie.RenderCache? renderCache,
+    bool? backgroundLoading,
   }) {
-    return Lottie.asset(
+    return _lottie.Lottie.asset(
       _assetName,
       controller: controller,
       animate: animate,
@@ -377,6 +338,9 @@ class LottieGenImage {
       addRepaintBoundary: addRepaintBoundary,
       filterQuality: filterQuality,
       onWarning: onWarning,
+      decoder: decoder,
+      renderCache: renderCache,
+      backgroundLoading: backgroundLoading,
     );
   }
 

@@ -1,0 +1,10 @@
+!/codeStyles/
+!/.name
+!/modules.xml
+!/runConfigurations/
+
+/dictionaries/
+/libraries/
+/runConfigurations/melos_*
+/shelf/
+/*.xml

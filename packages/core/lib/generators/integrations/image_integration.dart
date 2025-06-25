@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
-import 'package:flutter_gen_core/settings/asset_type.dart';
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
 
@@ -21,7 +20,9 @@ class ImageIntegration extends Integration {
       isPackage ? "'packages/$packageName/\$_assetName'" : '_assetName';
 
   @override
-  List<String> get requiredImports => ['package:flutter/widgets.dart'];
+  List<Import> get requiredImports => const [
+        Import('package:flutter/widgets.dart'),
+      ];
 
   @override
   String get classOutput => _classDefinition;
@@ -58,11 +59,10 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
-    ${isPackage ? deprecationMessagePackage : ''}
-    String? package$packageParameter,
-    FilterQuality filterQuality = FilterQuality.low,
+    ${isPackage ? '$deprecationMessagePackage\n' : ''}String? package$packageParameter,
+    FilterQuality filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) {
@@ -96,8 +96,7 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
 
   ImageProvider provider({
     AssetBundle? bundle,
-    ${isPackage ? deprecationMessagePackage : ''}
-    String? package$packageParameter,
+    ${isPackage ? '$deprecationMessagePackage\n' : ''}String? package$packageParameter,
   }) {
     return AssetImage(
       _assetName,
@@ -158,7 +157,10 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
   /// Extract metadata from the asset.
   ImageMetadata? _getMetadata(AssetType asset) {
     try {
-      final size = ImageSizeGetter.getSize(FileInput(File(asset.fullPath)));
+      final result = ImageSizeGetter.getSizeResult(
+        FileInput(File(asset.fullPath)),
+      );
+      final size = result.size;
       return ImageMetadata(size.width.toDouble(), size.height.toDouble());
     } catch (e) {
       stderr

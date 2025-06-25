@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
-import 'package:flutter_gen_core/settings/asset_type.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart';
 
 class SvgIntegration extends Integration {
@@ -11,11 +10,11 @@ class SvgIntegration extends Integration {
   String get packageExpression => isPackage ? ' = package' : '';
 
   @override
-  List<String> get requiredImports => [
-        'package:flutter/widgets.dart',
-        'package:flutter/services.dart',
-        'package:flutter_svg/flutter_svg.dart',
-        'package:vector_graphics/vector_graphics.dart',
+  List<Import> get requiredImports => const [
+        Import('package:flutter/widgets.dart'),
+        Import('package:flutter/services.dart'),
+        Import('package:flutter_svg/flutter_svg.dart', alias: '_svg'),
+        Import('package:vector_graphics/vector_graphics.dart', alias: '_vg'),
       ];
 
   @override
@@ -27,7 +26,7 @@ class SvgIntegration extends Integration {
     this.size,
     this.flavors = const {},
   }) : _isVecFormat = false;
-  
+
   const SvgGenImage.vec(
     this._assetName, {
     this.size,
@@ -41,12 +40,11 @@ class SvgIntegration extends Integration {
 
 ${isPackage ? "\n  static const String package = '$packageName';" : ''}
 
-  SvgPicture svg({
+  _svg.SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
-    ${isPackage ? deprecationMessagePackage : ''}
-    String? package$packageExpression,
+    ${isPackage ? '$deprecationMessagePackage\n' : ''}String? package$packageExpression,
     double? width,
     double? height,
     BoxFit fit = BoxFit.contain,
@@ -55,29 +53,31 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
     WidgetBuilder? placeholderBuilder,
     String? semanticsLabel,
     bool excludeFromSemantics = false,
-    SvgTheme? theme,
+    _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
     @deprecated BlendMode colorBlendMode = BlendMode.srcIn,
     @deprecated bool cacheColorFilter = false,
   }) {
-    final BytesLoader loader;
+    final _svg.BytesLoader loader;
     if (_isVecFormat) {
-      loader = AssetBytesLoader(
+      loader = _vg.AssetBytesLoader(
         _assetName,
         assetBundle: bundle,
         packageName: package,
       );
     } else {
-      loader = SvgAssetLoader(
+      loader = _svg.SvgAssetLoader(
         _assetName,
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
-    return SvgPicture(
+    return _svg.SvgPicture(
       loader,
       key: key,
       matchTextDirection: matchTextDirection,

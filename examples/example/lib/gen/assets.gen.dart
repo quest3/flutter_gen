@@ -7,23 +7,21 @@
 // ignore_for_file: type=lint
 // ignore_for_file: directives_ordering,unnecessary_import,implicit_dynamic_list_literal,deprecated_member_use
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:vector_graphics/vector_graphics.dart';
-import 'package:flare_flutter/flare_actor.dart';
-import 'package:flare_flutter/flare_controller.dart';
-import 'package:rive/rive.dart';
-import 'package:lottie/lottie.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart' as _svg;
+import 'package:lottie/lottie.dart' as _lottie;
+import 'package:rive/rive.dart' as _rive;
+import 'package:vector_graphics/vector_graphics.dart' as _vg;
 
 class $AssetsFlareGen {
   const $AssetsFlareGen();
 
   /// File path: assets/flare/Penguin.flr
-  FlareGenImage get penguin => const FlareGenImage('assets/flare/Penguin.flr');
+  String get penguin => 'assets/flare/Penguin.flr';
 
   /// List of all assets
-  List<FlareGenImage> get values => [penguin];
+  List<String> get values => [penguin];
 }
 
 class $AssetsImagesGen {
@@ -76,9 +74,16 @@ class $AssetsJsonGen {
 class $AssetsLottieGen {
   const $AssetsLottieGen();
 
+  /// File path: assets/lottie/XuiIZ9X1Rf.lottie
+  LottieGenImage get xuiIZ9X1Rf =>
+      const LottieGenImage('assets/lottie/XuiIZ9X1Rf.lottie');
+
   /// File path: assets/lottie/alarm-clock-lottie-v440.json
   LottieGenImage get alarmClockLottieV440 =>
       const LottieGenImage('assets/lottie/alarm-clock-lottie-v440.json');
+
+  /// File path: assets/lottie/cat.tgs
+  LottieGenImage get cat => const LottieGenImage('assets/lottie/cat.tgs');
 
   /// File path: assets/lottie/geometrical-animation.json
   LottieGenImage get geometricalAnimation =>
@@ -88,12 +93,22 @@ class $AssetsLottieGen {
   LottieGenImage get hamburgerArrow =>
       const LottieGenImage('assets/lottie/hamburger_arrow.json');
 
+  /// File path: assets/lottie/spinning_carrousel.zip
+  LottieGenImage get spinningCarrousel =>
+      const LottieGenImage('assets/lottie/spinning_carrousel.zip');
+
   /// Directory path: assets/lottie/wrong
   $AssetsLottieWrongGen get wrong => const $AssetsLottieWrongGen();
 
   /// List of all assets
-  List<LottieGenImage> get values =>
-      [alarmClockLottieV440, geometricalAnimation, hamburgerArrow];
+  List<LottieGenImage> get values => [
+        xuiIZ9X1Rf,
+        alarmClockLottieV440,
+        cat,
+        geometricalAnimation,
+        hamburgerArrow,
+        spinningCarrousel
+      ];
 }
 
 class $AssetsMixGen {
@@ -193,15 +208,18 @@ class $AssetsImagesIconsGen {
 class $AssetsLottieWrongGen {
   const $AssetsLottieWrongGen();
 
+  /// File path: assets/lottie/wrong/dummy.zip
+  String get dummy => 'assets/lottie/wrong/dummy.zip';
+
   /// File path: assets/lottie/wrong/rocket-lottie-v439.json
   String get rocketLottieV439 => 'assets/lottie/wrong/rocket-lottie-v439.json';
 
   /// List of all assets
-  List<String> get values => [rocketLottieV439];
+  List<String> get values => [dummy, rocketLottieV439];
 }
 
 class MyAssets {
-  MyAssets._();
+  const MyAssets._();
 
   static const String readme = 'README.md';
   static const $AssetsFlareGen flare = $AssetsFlareGen();
@@ -247,10 +265,10 @@ class AssetGenImage {
     ImageRepeat repeat = ImageRepeat.noRepeat,
     Rect? centerSlice,
     bool matchTextDirection = false,
-    bool gaplessPlayback = false,
+    bool gaplessPlayback = true,
     bool isAntiAlias = false,
     String? package,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) {
@@ -316,7 +334,7 @@ class SvgGenImage {
   final Set<String> flavors;
   final bool _isVecFormat;
 
-  SvgPicture svg({
+  _svg.SvgPicture svg({
     Key? key,
     bool matchTextDirection = false,
     AssetBundle? bundle,
@@ -329,29 +347,31 @@ class SvgGenImage {
     WidgetBuilder? placeholderBuilder,
     String? semanticsLabel,
     bool excludeFromSemantics = false,
-    SvgTheme? theme,
+    _svg.SvgTheme? theme,
+    _svg.ColorMapper? colorMapper,
     ColorFilter? colorFilter,
     Clip clipBehavior = Clip.hardEdge,
     @deprecated Color? color,
     @deprecated BlendMode colorBlendMode = BlendMode.srcIn,
     @deprecated bool cacheColorFilter = false,
   }) {
-    final BytesLoader loader;
+    final _svg.BytesLoader loader;
     if (_isVecFormat) {
-      loader = AssetBytesLoader(
+      loader = _vg.AssetBytesLoader(
         _assetName,
         assetBundle: bundle,
         packageName: package,
       );
     } else {
-      loader = SvgAssetLoader(
+      loader = _svg.SvgAssetLoader(
         _assetName,
         assetBundle: bundle,
         packageName: package,
         theme: theme,
+        colorMapper: colorMapper,
       );
     }
-    return SvgPicture(
+    return _svg.SvgPicture(
       loader,
       key: key,
       matchTextDirection: matchTextDirection,
@@ -375,53 +395,6 @@ class SvgGenImage {
   String get keyName => _assetName;
 }
 
-class FlareGenImage {
-  const FlareGenImage(
-    this._assetName, {
-    this.flavors = const {},
-  });
-
-  final String _assetName;
-  final Set<String> flavors;
-
-  FlareActor flare({
-    String? boundsNode,
-    String? animation,
-    BoxFit fit = BoxFit.contain,
-    Alignment alignment = Alignment.center,
-    bool isPaused = false,
-    bool snapToEnd = false,
-    FlareController? controller,
-    FlareCompletedCallback? callback,
-    Color? color,
-    bool shouldClip = true,
-    bool sizeFromArtboard = false,
-    String? artboard,
-    bool antialias = true,
-  }) {
-    return FlareActor(
-      _assetName,
-      boundsNode: boundsNode,
-      animation: animation,
-      fit: fit,
-      alignment: alignment,
-      isPaused: isPaused,
-      snapToEnd: snapToEnd,
-      controller: controller,
-      callback: callback,
-      color: color,
-      shouldClip: shouldClip,
-      sizeFromArtboard: sizeFromArtboard,
-      artboard: artboard,
-      antialias: antialias,
-    );
-  }
-
-  String get path => _assetName;
-
-  String get keyName => _assetName;
-}
-
 class RiveGenImage {
   const RiveGenImage(
     this._assetName, {
@@ -431,7 +404,7 @@ class RiveGenImage {
   final String _assetName;
   final Set<String> flavors;
 
-  RiveAnimation rive({
+  _rive.RiveAnimation rive({
     String? artboard,
     List<String> animations = const [],
     List<String> stateMachines = const [],
@@ -440,10 +413,10 @@ class RiveGenImage {
     Widget? placeHolder,
     bool antialiasing = true,
     bool useArtboardSize = false,
-    List<RiveAnimationController> controllers = const [],
-    OnInitCallback? onInit,
+    List<_rive.RiveAnimationController> controllers = const [],
+    _rive.OnInitCallback? onInit,
   }) {
-    return RiveAnimation.asset(
+    return _rive.RiveAnimation.asset(
       _assetName,
       artboard: artboard,
       animations: animations,
@@ -472,19 +445,23 @@ class LottieGenImage {
   final String _assetName;
   final Set<String> flavors;
 
-  LottieBuilder lottie({
+  _lottie.LottieBuilder lottie({
     Animation<double>? controller,
     bool? animate,
-    FrameRate? frameRate,
+    _lottie.FrameRate? frameRate,
     bool? repeat,
     bool? reverse,
-    LottieDelegates? delegates,
-    LottieOptions? options,
-    void Function(LottieComposition)? onLoaded,
-    LottieImageProviderFactory? imageProviderFactory,
+    _lottie.LottieDelegates? delegates,
+    _lottie.LottieOptions? options,
+    void Function(_lottie.LottieComposition)? onLoaded,
+    _lottie.LottieImageProviderFactory? imageProviderFactory,
     Key? key,
     AssetBundle? bundle,
-    Widget Function(BuildContext, Widget, LottieComposition?)? frameBuilder,
+    Widget Function(
+      BuildContext,
+      Widget,
+      _lottie.LottieComposition?,
+    )? frameBuilder,
     ImageErrorWidgetBuilder? errorBuilder,
     double? width,
     double? height,
@@ -494,8 +471,11 @@ class LottieGenImage {
     bool? addRepaintBoundary,
     FilterQuality? filterQuality,
     void Function(String)? onWarning,
+    _lottie.LottieDecoder? decoder,
+    _lottie.RenderCache? renderCache,
+    bool? backgroundLoading,
   }) {
-    return Lottie.asset(
+    return _lottie.Lottie.asset(
       _assetName,
       controller: controller,
       animate: animate,
@@ -518,6 +498,9 @@ class LottieGenImage {
       addRepaintBoundary: addRepaintBoundary,
       filterQuality: filterQuality,
       onWarning: onWarning,
+      decoder: decoder,
+      renderCache: renderCache,
+      backgroundLoading: backgroundLoading,
     );
   }
 

@@ -139,17 +139,6 @@ class LocaleData {
     for (final namespace in namespaces) {
       buffer.writeln(namespace.generateNewFileContent(localeName, formatter));
     }
-    buffer.writeln('@Deprecated("Use split I18nKeysxxx classes instead")');
-    buffer.writeln('class $className {');
-    buffer.writeln('$className._();');
-    for (final namespace in namespaces) {
-      buffer.writeln('@Deprecated("Use ${namespace.className} instead")\n'
-          'static const ${namespace.oldClassName} ${namespace.namespaceName} = ${namespace.oldClassName}();');
-    }
-    buffer.writeln('}');
-    for (final namespace in namespaces) {
-      buffer.writeln(namespace.generateOldFileContent(localeName, formatter));
-    }
     return formatter.format(buffer.toString());
   }
 }
@@ -240,74 +229,6 @@ class NamespaceData {
         }
         buffer.writeln(
             'static const String ${plural.name} = "$namespaceName.${plural.key}";');
-      }
-    }
-    buffer.writeln('}');
-    return formatter.format(buffer.toString());
-  }
-
-  String generateOldFileContent(String localeName, DartFormatter formatter) {
-    final buffer = StringBuffer();
-    buffer.writeln('@Deprecated("Use $className instead")');
-    buffer.writeln('class $oldClassName {');
-    buffer.writeln('const $oldClassName();');
-    Map<String, _PluralData> plurals = {};
-    for (final key in flattenData.keys) {
-      List<String> words = key.split(_tempSeparator);
-      String i18nKey = words.join('.');
-
-      final splitOfLast = words.last.split('-');
-      if (splitOfLast.length == 2) {
-        // maybe plural
-        int? number = int.tryParse(splitOfLast[1]);
-        if (number != null || splitOfLast[1] == 'other') {
-          // is plural
-          for (final separator in _separatorsToRemove) {
-            words = words.expand((e) => e.split(separator)).toList();
-          }
-          words.removeLast();
-          i18nKey = words.join('.');
-          String name = words[0];
-          for (int i = 1; i < words.length; i++) {
-            name = name + words[i].capitalize();
-          }
-          plurals[name] ??= _PluralData(name, i18nKey);
-          if (number != null) {
-            plurals[name]?.translation['$number'] =
-                escapeString(flattenData[key].toString());
-          } else if (splitOfLast[1] == 'other') {
-            plurals[name]?.translation['other'] =
-                escapeString(flattenData[key].toString());
-          }
-          continue;
-        }
-      }
-      for (final separator in _separatorsToRemove) {
-        words = words.expand((e) => e.split(separator)).toList();
-      }
-      String name = words[0];
-      for (int i = 1; i < words.length; i++) {
-        name = name + words[i].capitalize();
-      }
-      buffer.writeln('''
-      /// key : $namespaceName.$i18nKey
-      ///
-      /// value ($localeName): ${escapeString(flattenData[key].toString())}
-      String get $name => "$namespaceName.$i18nKey";
-      ''');
-    }
-    if (plurals.isNotEmpty) {
-      buffer.writeln('/// Plurals\n');
-      for (final plural in plurals.values) {
-        buffer.writeln('''
-      /// key : $namespaceName.${plural.key}
-      ///
-      /// value ($localeName): ''');
-        for (final e in plural.translation.entries) {
-          buffer.writeln('///   ${e.key} => ${e.value}');
-        }
-        buffer.writeln(
-            'String get ${plural.name} => "$namespaceName.${plural.key}";');
       }
     }
     buffer.writeln('}');

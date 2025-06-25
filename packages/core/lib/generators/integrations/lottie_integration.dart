@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
-import 'package:flutter_gen_core/settings/asset_type.dart';
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 
@@ -20,12 +21,17 @@ class LottieIntegration extends Integration {
     'layers', // Must include layers
   ];
 
+  static const _supportedMimeTypes = [
+    'application/json',
+    'application/zip',
+  ];
+
   String get packageExpression => isPackage ? ' = package' : '';
 
   @override
-  List<String> get requiredImports => [
-        'package:flutter/widgets.dart',
-        'package:lottie/lottie.dart',
+  List<Import> get requiredImports => const [
+        Import('package:flutter/widgets.dart'),
+        Import('package:lottie/lottie.dart', alias: '_lottie'),
       ];
 
   @override
@@ -42,31 +48,37 @@ class LottieIntegration extends Integration {
 
 ${isPackage ? "\n  static const String package = '$packageName';" : ''}
 
-  LottieBuilder lottie({
+  _lottie.LottieBuilder lottie({
     Animation<double>? controller,
     bool? animate,
-    FrameRate? frameRate,
+    _lottie.FrameRate? frameRate,
     bool? repeat,
     bool? reverse,
-    LottieDelegates? delegates,
-    LottieOptions? options,
-    void Function(LottieComposition)? onLoaded,
-    LottieImageProviderFactory? imageProviderFactory,
+    _lottie.LottieDelegates? delegates,
+    _lottie.LottieOptions? options,
+    void Function(_lottie.LottieComposition)? onLoaded,
+    _lottie.LottieImageProviderFactory? imageProviderFactory,
     Key? key,
     AssetBundle? bundle,
-    Widget Function(BuildContext, Widget, LottieComposition?)? frameBuilder,
+    Widget Function(
+      BuildContext,
+      Widget,
+      _lottie.LottieComposition?,
+    )? frameBuilder,
     ImageErrorWidgetBuilder? errorBuilder,
     double? width,
     double? height,
     BoxFit? fit,
     AlignmentGeometry? alignment,
-    ${isPackage ? deprecationMessagePackage : ''}
-    String? package$packageExpression,
+    ${isPackage ? '$deprecationMessagePackage\n' : ''}String? package$packageExpression,
     bool? addRepaintBoundary,
     FilterQuality? filterQuality,
     void Function(String)? onWarning,
+    _lottie.LottieDecoder? decoder,
+    _lottie.RenderCache? renderCache,
+    bool? backgroundLoading,
   }) {
-    return Lottie.asset(
+    return _lottie.Lottie.asset(
       _assetName,
       controller: controller,
       animate: animate,
@@ -89,6 +101,9 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
       addRepaintBoundary: addRepaintBoundary,
       filterQuality: filterQuality,
       onWarning: onWarning,
+      decoder: decoder,
+      renderCache: renderCache,
+      backgroundLoading: backgroundLoading,
     );
   }
 
@@ -106,13 +121,44 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
   @override
   bool get isConstConstructor => true;
 
-  bool isLottieFile(AssetType type) {
-    if (type.mime != 'application/json') {
+  bool isLottieFile(AssetType asset) {
+    if (asset.extension == '.lottie' || asset.extension == '.tgs') {
+      return true;
+    }
+    if (!_supportedMimeTypes.contains(asset.mime)) {
       return false;
     }
+    if (asset.mime == 'application/zip') {
+      final inputStream = InputFileStream(asset.fullPath);
+      final decoder = ZipDecoder();
+      Archive archive;
+      try {
+        // Compatible with archive v4.
+        archive = (decoder as dynamic).decodeStream(inputStream);
+      } on NoSuchMethodError {
+        archive = (decoder as dynamic).decodeBuffer(inputStream);
+      }
+      final jsonFile = archive.files.firstWhereOrNull(
+        (e) => e.name.endsWith('.json'),
+      );
+      if (jsonFile?.isFile != true) {
+        return false;
+      }
+      final content = utf8.decode(jsonFile!.content);
+      return _isValidJsonFile(asset, overrideInput: content);
+    }
+    return _isValidJsonFile(asset);
+  }
+
+  bool _isValidJsonFile(AssetType type, {String? overrideInput}) {
     try {
-      final absolutePath = p.join(type.rootPath, type.path);
-      String input = File(absolutePath).readAsStringSync();
+      final String input;
+      if (overrideInput != null) {
+        input = overrideInput;
+      } else {
+        final absolutePath = p.join(type.rootPath, type.path);
+        input = File(absolutePath).readAsStringSync();
+      }
       final fileKeys = jsonDecode(input) as Map<String, dynamic>;
       if (lottieKeys.every(fileKeys.containsKey) && fileKeys['v'] != null) {
         var version = Version.parse(fileKeys['v']);
