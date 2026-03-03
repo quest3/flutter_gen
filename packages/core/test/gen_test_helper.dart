@@ -40,7 +40,7 @@ Future<(String, String)> runAssetsGen(
   String fact, {
   String? build,
 }) async {
-  stdout.writeln('[DEBUG] test: Generate assets from config...');
+  print('[DEBUG] test: Generate assets from config...');
   final pubspecFile = File(pubspec);
 
   File? buildFile;
@@ -54,7 +54,7 @@ Future<(String, String)> runAssetsGen(
     assetsName: p.basename(generated),
   ).build();
 
-  stdout.writeln('[DEBUG] test: Generate assets from API...');
+  print('[DEBUG] test: Generate assets from API...');
   final config = loadPubspecConfig(pubspecFile, buildFile: buildFile);
   final formatter = buildDartFormatterFromConfig(config);
 
@@ -109,10 +109,7 @@ Future<(String, String)> expectedAssetsGen(
     build: build,
   );
   final (actual, expected) = results;
-  expect(
-    generated.readAsStringSync(),
-    isNotEmpty,
-  );
+  expect(generated.readAsStringSync(), isNotEmpty);
   expect(actual, expected);
   return (actual, expected);
 }
@@ -123,7 +120,7 @@ Future<(String, String)> runColorsGen(
   String fact, {
   String? build,
 }) async {
-  stdout.writeln('[DEBUG] test: Generate colors from config...');
+  print('[DEBUG] test: Generate colors from config...');
   final pubspecFile = File(pubspec);
 
   File? buildFile;
@@ -137,7 +134,7 @@ Future<(String, String)> runColorsGen(
     colorsName: p.basename(generated),
   ).build();
 
-  stdout.writeln('[DEBUG] test: Generate colors from API...');
+  print('[DEBUG] test: Generate colors from API...');
   final config = loadPubspecConfig(pubspecFile, buildFile: buildFile);
   final formatter = buildDartFormatterFromConfig(config);
 
@@ -173,7 +170,7 @@ Future<(String, String)> runFontsGen(
   String fact, {
   String? build,
 }) async {
-  stdout.writeln('[DEBUG] test: Generate fonts from config...');
+  print('[DEBUG] test: Generate fonts from config...');
   final pubspecFile = File(pubspec);
 
   File? buildFile;
@@ -187,14 +184,11 @@ Future<(String, String)> runFontsGen(
     fontsName: p.basename(generated),
   ).build();
 
-  stdout.writeln('[DEBUG] test: Generate fonts from API...');
+  print('[DEBUG] test: Generate fonts from API...');
   final config = loadPubspecConfig(pubspecFile, buildFile: buildFile);
   final formatter = buildDartFormatterFromConfig(config);
 
-  final actual = generateFonts(
-    FontsGenConfig.fromConfig(config),
-    formatter,
-  );
+  final actual = generateFonts(FontsGenConfig.fromConfig(config), formatter);
   final expected = formatter.format(File(fact).readAsStringSync());
   return (actual, expected);
 }
@@ -217,10 +211,7 @@ Future<(String, String)> expectedFontsGen(
 }
 
 /// Verify generated package name.
-String? expectedPackageNameGen(
-  String pubspec,
-  String? fact,
-) {
+String? expectedPackageNameGen(String pubspec, String? fact) {
   final pubspecFile = File(pubspec);
   final config = AssetsGenConfig.fromConfig(
     pubspecFile,

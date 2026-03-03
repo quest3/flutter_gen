@@ -45,7 +45,12 @@ void main() {
     test('Integration.classInstantiate', () {
       expect(
         TestIntegration().classInstantiate(
-          AssetType(rootPath: resPath, path: 'assets/path', flavors: {'test'}),
+          AssetType(
+            rootPath: resPath,
+            path: 'assets/path',
+            flavors: {'test'},
+            transformers: {},
+          ),
         ),
         'TestIntegration(\'assets/path\', flavors: {\'test\'},)',
       );
@@ -63,6 +68,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path',
             flavors: {},
+            transformers: {},
           ),
         ),
         'SvgGenImage(\'assets/path\')',
@@ -73,6 +79,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path',
             flavors: {'test'},
+            transformers: {},
           ),
         ),
         'SvgGenImage(\'assets/path\', flavors: {\'test\'},)',
@@ -81,11 +88,45 @@ void main() {
         integration.classInstantiate(
           AssetType(
             rootPath: resPath,
+            path: 'assets/path/dog.svg',
+            flavors: {},
+            transformers: {},
+          ),
+        ),
+        'SvgGenImage(\'assets/path/dog.svg\')',
+      );
+      expect(
+        integration.classInstantiate(
+          AssetType(
+            rootPath: resPath,
             path: 'assets/path/dog.vec',
             flavors: {},
+            transformers: {},
           ),
         ),
         'SvgGenImage.vec(\'assets/path/dog.vec\')',
+      );
+      expect(
+        integration.classInstantiate(
+          AssetType(
+            rootPath: resPath,
+            path: 'assets/path/dog.svg',
+            flavors: {},
+            transformers: {'test'},
+          ),
+        ),
+        'SvgGenImage(\'assets/path/dog.svg\')',
+      );
+      expect(
+        integration.classInstantiate(
+          AssetType(
+            rootPath: resPath,
+            path: 'assets/path/dog.svg',
+            flavors: {},
+            transformers: {'vector_graphics_compiler'},
+          ),
+        ),
+        'SvgGenImage.vec(\'assets/path/dog.svg\')',
       );
       expect(
         integration.isSupport(
@@ -93,6 +134,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path/dog.svg',
             flavors: {},
+            transformers: {},
           ),
         ),
         isTrue,
@@ -103,6 +145,18 @@ void main() {
             rootPath: resPath,
             path: 'assets/path/dog.vec',
             flavors: {},
+            transformers: {},
+          ),
+        ),
+        isTrue,
+      );
+      expect(
+        integration.isSupport(
+          AssetType(
+            rootPath: resPath,
+            path: 'assets/path/dog.svg',
+            flavors: {},
+            transformers: {'test'},
           ),
         ),
         isTrue,
@@ -113,6 +167,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path/dog.png',
             flavors: {},
+            transformers: {},
           ),
         ),
         isFalse,
@@ -147,6 +202,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path',
             flavors: {},
+            transformers: {},
           ),
         ),
         'RiveGenImage(\'assets/path\')',
@@ -157,6 +213,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path/dog.riv',
             flavors: {},
+            transformers: {},
           ),
         ),
         isTrue,
@@ -167,6 +224,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/path/dog.json',
             flavors: {},
+            transformers: {},
           ),
         ),
         isFalse,
@@ -176,8 +234,9 @@ void main() {
 
       final integrationWithPackage = RiveIntegration('package_name');
       expect(
-        integrationWithPackage.classOutput
-            .contains('\'packages/package_name/\$_assetName\','),
+        integrationWithPackage.classOutput.contains(
+          '\'packages/package_name/\$_assetName\',',
+        ),
         isTrue,
       );
     });
@@ -194,6 +253,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/lottie',
             flavors: {},
+            transformers: {},
           ),
         ),
         'LottieGenImage(\'assets/lottie\')',
@@ -204,6 +264,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/lottie/hamburger_arrow.json',
             flavors: {},
+            transformers: {},
           ),
         ),
         isTrue,
@@ -214,6 +275,7 @@ void main() {
             rootPath: resPath,
             path: 'assets/lottie/hamburger_arrow_without_version.json',
             flavors: {},
+            transformers: {},
           ),
         ),
         isFalse,

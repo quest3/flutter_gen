@@ -135,7 +135,7 @@ fluttergen -c example/pubspec.yaml
 ## Configuration file
 
 [FlutterGen] generates dart files based on the key **`flutter`** and **`flutter_gen`** of [`pubspec.yaml`](https://dart.dev/tools/pub/pubspec).  
-Default configuration can be found [here](https://github.com/FlutterGen/flutter_gen/tree/main/packages/core/lib/settings/config_default.dart). 
+Default configuration can be found [here](https://github.com/FlutterGen/flutter_gen/tree/main/packages/core/lib/settings/config_default.dart).
 
 ```yaml
 # pubspec.yaml
@@ -143,7 +143,7 @@ Default configuration can be found [here](https://github.com/FlutterGen/flutter_
 
 flutter_gen:
   output: lib/gen/ # Optional (default: lib/gen/)
-  line_length: 80 # Optional (default: 80)
+  # line_length: 80 # Optional
 
   # Optional
   integrations:
@@ -173,7 +173,6 @@ flutter:
 
 You can also configure generate options in the `build.yaml`, it will be read before the `pubspec.yaml` if it exists.
 
-
 ```yaml
 # build.yaml
 # ...
@@ -182,9 +181,9 @@ targets:
   $default:
     builders:
       flutter_gen_runner: # or flutter_gen
-        options: 
+        options:
           output: lib/build_gen/ # Optional (default: lib/gen/)
-          line_length: 120 # Optional (default: 80)
+          line_length: 120 # Optional
 ```
 
 ## Available Parsers
@@ -204,12 +203,23 @@ flutter:
     - assets/images/
     - assets/images/chip3/chip.jpg
     - assets/images/chip4/chip.jpg
-    - assets/images/icons/paint.svg
+    - path: assets/images/icons/paint.svg
+    - path: assets/images/icons/transformed.svg
+      transformers:
+        - package: vector_graphics_compiler
     - assets/images/icons/dart@test.svg
     - assets/json/fruits.json
     - assets/flare/Penguin.flr
     - assets/rive/vehicles.riv
     - pictures/ocean_view.jpg
+
+  # Also include assets from deferred components
+  # https://docs.flutter.dev/perf/deferred-components
+  deferred-components:
+    - name: myDeferredComponent
+      assets:
+        - assets/images/another_image.jps
+        - assets/videos/a_large_video.mp4
 ```
 
 These configurations will generate **`assets.gen.dart`** under the **`lib/gen/`** directory by default.
@@ -276,7 +286,9 @@ Widget build(BuildContext context) {
   );
 }
 ```
+
 or
+
 ```dart
 // Explicit usage for `Image`/`SvgPicture`/`Lottie`.
 Widget build(BuildContext context) {
@@ -328,8 +340,10 @@ For image based assets, a new nullable `size` field is added to the
 generated class. For example:
 
 ```dart
-AssetGenImage get logo => 
-  const AssetGenImage('assets/images/logo.png', size: Size(209.0, 49.0));
+AssetGenImage get logo => const AssetGenImage(
+  'assets/images/logo.png',
+  size: Size(209.0, 49.0),
+);
 ```
 
 Which can now be used at runtime without parsing the information from the actual asset.
@@ -338,6 +352,32 @@ Which can now be used at runtime without parsing the information from the actual
 Widget build(BuildContext context) {
   return Assets.images.logo.size!.width;
 }
+```
+
+You can use `parse_animation` to generate more animation details.
+It will automatically parse all animation information for GIF and WebP files,
+including frames, duration, etc. As this option significantly increases generation time,
+The option is disabled by default; enabling it will significantly increase the generation elapse.
+
+```yaml
+flutter_gen:
+  images:
+    parse_animation: true # <- Add this line (default: false)
+    # This option implies parse_metadata: true when parsing images.
+```
+
+For GIF and WebP animation, several new nullable field is added to the
+generated class. For example:
+
+```dart
+AssetGenImage get animated =>
+  const AssetGenImage(
+    'assets/images/animated.webp',
+    size: Size(209.0, 49.0),
+    isAnimation: true,
+    duration: Duration(milliseconds: 1000),
+    frames: 15,
+  );
 ```
 
 #### Usage Example
@@ -380,7 +420,7 @@ flutter_gen:
     image: false
 ```
 
-If you are using SVG images with [flutter_svg](https://pub.dev/packages/flutter_svg) you can use the integration feature.
+If you are using SVG images with [flutter_svg](https://pub.dev/packages/flutter_svg) you can use the integration feature. This feature also supports using `vector_graphics_compiler` transformer and the produced code will use the `AssetBytesLoader` for such transformed assets.
 
 ```yaml
 # pubspec.yaml
@@ -391,6 +431,9 @@ flutter_gen:
 flutter:
   assets:
     - assets/images/icons/paint.svg
+    - path: assets/images/icons/transformed.svg
+      transformers:
+        - package: vector_graphics_compiler
 ```
 
 ```dart
@@ -405,7 +448,7 @@ Widget build(BuildContext context) {
 **Available Integrations**
 
 | Packages                                            | File extension             | Setting             | Usage                                     |
-|-----------------------------------------------------|----------------------------|---------------------|-------------------------------------------|
+| --------------------------------------------------- | -------------------------- | ------------------- | ----------------------------------------- |
 | [flutter_svg](https://pub.dev/packages/flutter_svg) | .svg                       | `flutter_svg: true` | Assets.images.icons.paint.**svg()**       |
 | [rive](https://pub.dev/packages/rive)               | .riv                       | `rive: true`        | Assets.rive.vehicles.**rive()**           |
 | [lottie](https://pub.dev/packages/lottie)           | .json, .zip, .lottie, .tgs | `lottie: true`      | Assets.lottie.hamburgerArrow.**lottie()** |
@@ -427,7 +470,7 @@ final json = await rootBundle.loadString(Assets.json.fruits);
 # pubspec.yaml
 flutter_gen:
   assets:
-    outputs: 
+    outputs:
       # Assets.imagesChip
       # style: camel-case
 
@@ -575,7 +618,9 @@ Plugin issues that are not specific to [FlutterGen] can be filed in the [Flutter
 ### Known Issues
 
 #### Bad State: No Element when using build_runner
+
 If you get an error message like this:
+
 ```
 [SEVERE] flutter_gen_runner:flutter_gen_runner on $package$:
 
@@ -590,7 +635,7 @@ targets:
   $default:
     sources:
       include:
-        - pubspec.yaml  # add this line
+        - pubspec.yaml # add this line
         - ...
 ```
 
@@ -613,8 +658,6 @@ template-arb-file: app_en.arb
 output-localization-file: app_localizations.dart
 synthetic-package: false <--- ⚠️Add this line⚠️
 ```
-
-If you get 
 
 ## Contributing
 

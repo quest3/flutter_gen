@@ -76,6 +76,7 @@ class Flutter {
   const Flutter({
     required this.assets,
     required this.fonts,
+    required this.deferredComponents,
   });
 
   factory Flutter.fromJson(Map json) => _$FlutterFromJson(json);
@@ -85,6 +86,9 @@ class Flutter {
 
   @JsonKey(name: 'fonts', required: true)
   final List<FlutterFonts> fonts;
+
+  @JsonKey(name: 'deferred-components', required: false)
+  final List<FlutterDeferredComponents>? deferredComponents;
 }
 
 @JsonSerializable(disallowUnrecognizedKeys: false)
@@ -103,6 +107,7 @@ class FlutterGen {
     required this.output,
     required this.lineLength,
     required this.parseMetadata,
+    required this.images,
     required this.assets,
     required this.fonts,
     required this.i18n,
@@ -115,11 +120,14 @@ class FlutterGen {
   @JsonKey(name: 'output', required: true)
   final String output;
 
-  @JsonKey(name: 'line_length', required: true)
-  final int lineLength;
+  @JsonKey(name: 'line_length')
+  final int? lineLength;
 
   @JsonKey(name: 'parse_metadata', required: true)
   final bool parseMetadata;
+
+  @JsonKey(name: 'images', required: true)
+  final FlutterGenImages images;
 
   @JsonKey(name: 'assets', required: true)
   final FlutterGenAssets assets;
@@ -187,6 +195,19 @@ class FlutterGenAssets {
 
   @JsonKey(name: 'exclude', required: true)
   final List<String> exclude;
+}
+
+@JsonSerializable()
+class FlutterGenImages {
+  const FlutterGenImages({
+    required this.parseAnimation,
+  });
+
+  factory FlutterGenImages.fromJson(Map json) =>
+      _$FlutterGenImagesFromJson(json);
+
+  @JsonKey(name: 'parse_animation', required: true)
+  final bool parseAnimation;
 }
 
 @JsonSerializable()
@@ -320,4 +341,21 @@ class FlutterGenElementFontsOutputs extends FlutterGenElementOutputs {
 
   @JsonKey(name: 'package_parameter_enabled', defaultValue: false)
   final bool packageParameterEnabled;
+}
+
+@JsonSerializable()
+class FlutterDeferredComponents {
+  const FlutterDeferredComponents({
+    required this.name,
+    required this.assets,
+  });
+
+  factory FlutterDeferredComponents.fromJson(Map json) =>
+      _$FlutterDeferredComponentsFromJson(json);
+
+  @JsonKey(name: 'name', required: true)
+  final String name;
+
+  @JsonKey(name: 'assets', required: false)
+  final List<Object>? assets;
 }

@@ -65,10 +65,7 @@ void main() {
           "@Deprecated('Do not specify package for a generated library asset')",
         ),
       );
-      expect(
-        content,
-        contains('String? package = package,'),
-      );
+      expect(content, contains('String? package = package,'));
     });
 
     test('Assets with directory path enabled', () async {
@@ -99,6 +96,11 @@ void main() {
 
     test('Assets with flavored assets', () async {
       const pubspec = 'test_resources/pubspec_assets_flavored.yaml';
+      await expectedAssetsGen(pubspec);
+    });
+
+    test('Assets with deferred components assets', () async {
+      const pubspec = 'test_resources/pubspec_assets_deferred_components.yaml';
       await expectedAssetsGen(pubspec);
     });
 
@@ -167,7 +169,14 @@ void main() {
 
       final List<AssetType> assets = tests.keys
           .sorted()
-          .map((e) => AssetType(rootPath: '', path: e, flavors: {}))
+          .map(
+            (e) => AssetType(
+              rootPath: '',
+              path: e,
+              flavors: {},
+              transformers: {},
+            ),
+          )
           .toList();
 
       final got = assets.mapToUniqueAssetType(camelCase);

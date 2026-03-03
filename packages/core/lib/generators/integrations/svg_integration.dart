@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter_gen_core/generators/integrations/integration.dart';
+import 'package:flutter_gen_core/utils/log.dart';
 import 'package:vector_graphics_compiler/vector_graphics_compiler.dart';
 
 class SvgIntegration extends Integration {
-  SvgIntegration(String packageName, {super.parseMetadata})
-      : super(packageName);
+  SvgIntegration(
+    String packageName, {
+    super.parseMetadata,
+  }) : super(packageName);
 
   String get packageExpression => isPackage ? ' = package' : '';
 
@@ -103,12 +106,15 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
   @override
   String get className => 'SvgGenImage';
 
+  static const vectorCompileTransformer = 'vector_graphics_compiler';
+
   @override
   String classInstantiate(AssetType asset) {
     // Query extra information about the SVG.
     final info = parseMetadata ? _getMetadata(asset) : null;
     final buffer = StringBuffer(className);
-    if (asset.extension == '.vec') {
+    if (asset.extension == '.vec' ||
+        asset.transformers.contains(vectorCompileTransformer)) {
       buffer.write('.vec');
     }
     buffer.write('(');
@@ -134,11 +140,12 @@ ${isPackage ? "\n  static const String package = '$packageName';" : ''}
       // but it's also the same way it will be eventually rendered by Flutter.
       final svg = File(asset.fullPath).readAsStringSync();
       final vec = parseWithoutOptimizers(svg);
-      return ImageMetadata(vec.width, vec.height);
-    } catch (e) {
-      stderr.writeln(
-        '[WARNING] Failed to parse SVG \'${asset.path}\' metadata: $e',
+      return ImageMetadata(
+        width: vec.width,
+        height: vec.height,
       );
+    } catch (e, s) {
+      log.warning('Failed to parse SVG \'${asset.path}\' metadata.', e, s);
       return null;
     }
   }

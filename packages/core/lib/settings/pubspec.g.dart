@@ -44,9 +44,15 @@ Flutter _$FlutterFromJson(Map json) => $checkedCreate(
               (v) => (v as List<dynamic>)
                   .map((e) => FlutterFonts.fromJson(e as Map))
                   .toList()),
+          deferredComponents: $checkedConvert(
+              'deferred-components',
+              (v) => (v as List<dynamic>?)
+                  ?.map((e) => FlutterDeferredComponents.fromJson(e as Map))
+                  .toList()),
         );
         return val;
       },
+      fieldKeyMap: const {'deferredComponents': 'deferred-components'},
     );
 
 FlutterFonts _$FlutterFontsFromJson(Map json) => $checkedCreate(
@@ -74,6 +80,7 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
             'output',
             'line_length',
             'parse_metadata',
+            'images',
             'assets',
             'fonts',
             'i18n',
@@ -82,8 +89,8 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
           ],
           requiredKeys: const [
             'output',
-            'line_length',
             'parse_metadata',
+            'images',
             'assets',
             'fonts',
             'i18n',
@@ -93,8 +100,11 @@ FlutterGen _$FlutterGenFromJson(Map json) => $checkedCreate(
         );
         final val = FlutterGen(
           output: $checkedConvert('output', (v) => v as String),
-          lineLength: $checkedConvert('line_length', (v) => (v as num).toInt()),
+          lineLength:
+              $checkedConvert('line_length', (v) => (v as num?)?.toInt()),
           parseMetadata: $checkedConvert('parse_metadata', (v) => v as bool),
+          images: $checkedConvert(
+              'images', (v) => FlutterGenImages.fromJson(v as Map)),
           assets: $checkedConvert(
               'assets', (v) => FlutterGenAssets.fromJson(v as Map)),
           fonts: $checkedConvert(
@@ -164,6 +174,23 @@ FlutterGenAssets _$FlutterGenAssetsFromJson(Map json) => $checkedCreate(
       fieldKeyMap: const {
         'packageParameterEnabled': 'package_parameter_enabled'
       },
+    );
+
+FlutterGenImages _$FlutterGenImagesFromJson(Map json) => $checkedCreate(
+      'FlutterGenImages',
+      json,
+      ($checkedConvert) {
+        $checkKeys(
+          json,
+          allowedKeys: const ['parse_animation'],
+          requiredKeys: const ['parse_animation'],
+        );
+        final val = FlutterGenImages(
+          parseAnimation: $checkedConvert('parse_animation', (v) => v as bool),
+        );
+        return val;
+      },
+      fieldKeyMap: const {'parseAnimation': 'parse_animation'},
     );
 
 FlutterGenFonts _$FlutterGenFontsFromJson(Map json) => $checkedCreate(
@@ -299,5 +326,24 @@ FlutterGenElementFontsOutputs _$FlutterGenElementFontsOutputsFromJson(
       fieldKeyMap: const {
         'className': 'class_name',
         'packageParameterEnabled': 'package_parameter_enabled'
+      },
+    );
+
+FlutterDeferredComponents _$FlutterDeferredComponentsFromJson(Map json) =>
+    $checkedCreate(
+      'FlutterDeferredComponents',
+      json,
+      ($checkedConvert) {
+        $checkKeys(
+          json,
+          allowedKeys: const ['name', 'assets'],
+          requiredKeys: const ['name'],
+        );
+        final val = FlutterDeferredComponents(
+          name: $checkedConvert('name', (v) => v as String),
+          assets: $checkedConvert('assets',
+              (v) => (v as List<dynamic>?)?.map((e) => e as Object).toList()),
+        );
+        return val;
       },
     );
