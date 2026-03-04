@@ -1,10 +1,9 @@
 import 'dart:io' show Directory, File;
 
-import 'package:dart_style/dart_style.dart' show DartFormatter;
-import 'package:flutter_gen_core/generators/i18n_generator.dart';
 import 'package:flutter_gen_core/generators/assets_generator.dart';
 import 'package:flutter_gen_core/generators/colors_generator.dart';
 import 'package:flutter_gen_core/generators/fonts_generator.dart';
+import 'package:flutter_gen_core/generators/i18n_generator.dart';
 import 'package:flutter_gen_core/settings/config.dart';
 import 'package:flutter_gen_core/utils/file.dart';
 import 'package:flutter_gen_core/utils/formatter.dart';
@@ -89,12 +88,10 @@ class FlutterGenerator {
       log.info('Generated: $fontsPath');
     }
     if (flutterGen.i18n.enabled && flutter.assets.isNotEmpty) {
-      final generated =
-          generateI18n(formatter, pubspecFile.parent, flutterGen.i18n);
-      final i18nPath =
-          normalize(join(pubspecFile.parent.path, output, i18nName));
+      final generated = generateI18n(formatter, pubspecFile.parent, flutterGen.i18n);
+      final i18nPath = normalize(join(pubspecFile.parent.path, output, i18nName));
       writer(generated, i18nPath);
-      stdout.writeln('Generated: $i18nPath');
+      log.info('Generated: $i18nPath');
     }
 
     log.info('Finished generating.');
