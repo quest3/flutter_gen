@@ -2,6 +2,7 @@ import 'dart:io';
 
 // import 'package:collection/collection.dart';
 // import 'package:dart_style/dart_style.dart' show TrailingCommas;
+import 'package:flutter_gen_core/generators/registry.dart';
 import 'package:flutter_gen_core/settings/config_default.dart';
 import 'package:flutter_gen_core/settings/pubspec.dart';
 import 'package:flutter_gen_core/utils/cast.dart' show safeCast;
@@ -9,8 +10,10 @@ import 'package:flutter_gen_core/utils/error.dart';
 import 'package:flutter_gen_core/utils/log.dart';
 import 'package:flutter_gen_core/utils/map.dart';
 import 'package:flutter_gen_core/version.gen.dart';
+import 'package:json_annotation/json_annotation.dart'
+    show CheckedFromJsonException;
 import 'package:path/path.dart';
-import 'package:pub_semver/pub_semver.dart' show VersionConstraint;
+import 'package:pub_semver/pub_semver.dart' show VersionConstraint, Version;
 import 'package:yaml/yaml.dart';
 
 class Config {
@@ -18,6 +21,8 @@ class Config {
     required this.pubspec,
     required this.pubspecFile,
     required this.sdkConstraint,
+    required this.integrationResolvedVersions,
+    required this.integrationVersionConstraints,
     // required this.formatterTrailingCommas,
     required this.formatterPageWidth,
   });
@@ -25,6 +30,8 @@ class Config {
   final Pubspec pubspec;
   final File pubspecFile;
   final VersionConstraint? sdkConstraint;
+  final Map<Type, Version> integrationResolvedVersions;
+  final Map<Type, VersionConstraint> integrationVersionConstraints;
 
   // TODO(ANYONE): Allow passing the trailing commas option after the SDK constraint was bumped to ^3.7.
   // final TrailingCommas? formatterTrailingCommas;
@@ -32,26 +39,23 @@ class Config {
   final int? formatterPageWidth;
 }
 
+class ConfigLoadInput {
+  const ConfigLoadInput({
+    required this.pubspecFile,
+    required this.pubspecContent,
+    this.buildOptions,
+    this.pubspecLockContent,
+    this.analysisOptionsContent,
+  });
+
+  final File pubspecFile;
+  final String pubspecContent;
+  final Map? buildOptions;
+  final String? pubspecLockContent;
+  final String? analysisOptionsContent;
+}
+
 Config loadPubspecConfig(File pubspecFile, {File? buildFile}) {
-  final pubspecLocaleHint = normalize(
-    join(basename(pubspecFile.parent.path), basename(pubspecFile.path)),
-  );
-
-  log.info('v$packageVersion Loading ...');
-  log.info('Reading options from $pubspecLocaleHint');
-
-  VersionConstraint? sdkConstraint;
-
-  final defaultMap = loadYaml(configDefaultYamlContent) as YamlMap?;
-
-  final pubspecContent = pubspecFile.readAsStringSync();
-  final pubspecMap = loadYaml(pubspecContent) as YamlMap?;
-  if (safeCast<String>(pubspecMap?['environment']?['sdk']) case final sdk?) {
-    sdkConstraint = VersionConstraint.parse(sdk);
-  }
-
-  Map mergedMap = mergeMap([defaultMap, pubspecMap]);
-
   YamlMap? getBuildFileOptions(File file) {
     if (!file.existsSync()) {
       return null;
@@ -67,6 +71,16 @@ Config loadPubspecConfig(File pubspecFile, {File? buildFile}) {
     return null;
   }
 
+  final pubspecLocaleHint = normalize(
+    join(basename(pubspecFile.parent.path), basename(pubspecFile.path)),
+  );
+
+  log.info('v$packageVersion Loading ...');
+  log.info('Reading options from $pubspecLocaleHint');
+
+  final pubspecContent = pubspecFile.readAsStringSync();
+  Map? buildOptions;
+
   // Fallback to the build.yaml when no build file has been specified and
   // the default one has valid configurations.
   if (buildFile == null && getBuildFileOptions(File('build.yaml')) != null) {
@@ -77,8 +91,7 @@ Config loadPubspecConfig(File pubspecFile, {File? buildFile}) {
     if (buildFile.existsSync()) {
       final optionBuildMap = getBuildFileOptions(buildFile);
       if (optionBuildMap != null) {
-        final buildMap = {'flutter_gen': optionBuildMap};
-        mergedMap = mergeMap([mergedMap, buildMap]);
+        buildOptions = optionBuildMap;
         final buildLocaleHint = normalize(
           join(basename(buildFile.parent.path), basename(buildFile.path)),
         );
@@ -97,28 +110,84 @@ Config loadPubspecConfig(File pubspecFile, {File? buildFile}) {
     }
   }
 
-  final pubspec = Pubspec.fromJson(mergedMap);
-
   final pubspecLockFile = File(
-    normalize(join(basename(pubspecFile.parent.path), 'pubspec.lock')),
+    normalize(join(pubspecFile.parent.path, 'pubspec.lock')),
   );
   final pubspecLockContent = switch (pubspecLockFile.existsSync()) {
     true => pubspecLockFile.readAsStringSync(),
     false => '',
   };
-  final pubspecLockMap = loadYaml(pubspecLockContent) as YamlMap?;
-  if (safeCast<String>(pubspecLockMap?['sdks']?['dart']) case final sdk?) {
-    sdkConstraint ??= VersionConstraint.parse(sdk);
-  }
 
   final analysisOptionsFile = File(
-    normalize(join(basename(pubspecFile.parent.path), 'analysis_options.yaml')),
+    normalize(join(pubspecFile.parent.path, 'analysis_options.yaml')),
   );
   final analysisOptionsContent = switch (analysisOptionsFile.existsSync()) {
     true => analysisOptionsFile.readAsStringSync(),
     false => '',
   };
-  final analysisOptionsMap = loadYaml(analysisOptionsContent) as YamlMap?;
+
+  return loadPubspecConfigFromInput(
+    ConfigLoadInput(
+      pubspecFile: pubspecFile,
+      pubspecContent: pubspecContent,
+      buildOptions: buildOptions,
+      pubspecLockContent: pubspecLockContent,
+      analysisOptionsContent: analysisOptionsContent,
+    ),
+  );
+}
+
+Config loadPubspecConfigFromInput(ConfigLoadInput input) {
+  final pubspecLocaleHint = normalize(
+    join(
+      basename(input.pubspecFile.parent.path),
+      basename(input.pubspecFile.path),
+    ),
+  );
+
+  log.info('v$packageVersion Loading ...');
+  log.info('Reading options from $pubspecLocaleHint');
+
+  VersionConstraint? sdkConstraint;
+
+  final defaultMap = loadYaml(configDefaultYamlContent) as YamlMap?;
+  final pubspecMap = loadYaml(input.pubspecContent) as YamlMap?;
+  if (safeCast<String>(pubspecMap?['environment']?['sdk']) case final sdk?) {
+    sdkConstraint = VersionConstraint.parse(sdk);
+  }
+
+  Map mergedMap = mergeMap([defaultMap, pubspecMap]);
+  if (input.buildOptions case final Map buildOptions
+      when buildOptions.isNotEmpty) {
+    mergedMap = mergeMap([
+      mergedMap,
+      {'flutter_gen': buildOptions},
+    ]);
+    log.info('Reading options from BuilderOptions');
+  }
+
+  final pubspec = Pubspec.fromJson(mergedMap);
+
+  final pubspecLockMap = loadYaml(input.pubspecLockContent ?? '') as YamlMap?;
+  if (safeCast<String>(pubspecLockMap?['sdks']?['dart']) case final sdk?) {
+    sdkConstraint ??= VersionConstraint.parse(sdk);
+  }
+
+  final pubspecLockPackages = safeCast<YamlMap>(pubspecLockMap?['packages']);
+  final integrationVersionConstraints = <Type, VersionConstraint>{};
+  final integrationResolvedVersions = <Type, Version>{};
+  for (final entry in integrationPackages.entries) {
+    if (pubspec.dependenciesVersionConstraint[entry.value] case final c?) {
+      integrationVersionConstraints[entry.key] = c;
+    }
+    if (pubspecLockPackages?[entry.value]?['version'] case final String v) {
+      final version = Version.parse(v);
+      integrationResolvedVersions[entry.key] = version;
+    }
+  }
+
+  final analysisOptionsMap =
+      loadYaml(input.analysisOptionsContent ?? '') as YamlMap?;
   // final formatterTrailingCommas = switch (safeCast<String>(
   //   analysisOptionsMap?['formatter']?['trailing_commas'],
   // )) {
@@ -131,8 +200,10 @@ Config loadPubspecConfig(File pubspecFile, {File? buildFile}) {
 
   return Config._(
     pubspec: pubspec,
-    pubspecFile: pubspecFile,
+    pubspecFile: input.pubspecFile,
     sdkConstraint: sdkConstraint,
+    integrationResolvedVersions: integrationResolvedVersions,
+    integrationVersionConstraints: integrationVersionConstraints,
     // formatterTrailingCommas: formatterTrailingCommas,
     formatterPageWidth: formatterPageWidth,
   );
@@ -144,6 +215,21 @@ Config? loadPubspecConfigOrNull(File pubspecFile, {File? buildFile}) {
   } on FileSystemException catch (e, s) {
     log.severe('File system error when reading files.', e, s);
   } on InvalidSettingsException catch (e, s) {
+    log.severe('Invalid settings in files.', e, s);
+  } on CheckedFromJsonException catch (e, s) {
+    log.severe('Invalid settings in files.', e, s);
+  }
+  return null;
+}
+
+Config? loadPubspecConfigFromInputOrNull(ConfigLoadInput input) {
+  try {
+    return loadPubspecConfigFromInput(input);
+  } on FileSystemException catch (e, s) {
+    log.severe('File system error when reading files.', e, s);
+  } on InvalidSettingsException catch (e, s) {
+    log.severe('Invalid settings in files.', e, s);
+  } on CheckedFromJsonException catch (e, s) {
     log.severe('Invalid settings in files.', e, s);
   }
   return null;

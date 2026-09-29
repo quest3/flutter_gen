@@ -220,9 +220,7 @@ class $AssetsLottieWrongGen {
   List<String> get values => [dummy, rocketLottieV439];
 }
 
-class MyAssets {
-  const MyAssets._();
-
+abstract final class MyAssets {
   static const String readme = 'README.md';
   static const $AssetsFlareGen flare = $AssetsFlareGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
@@ -420,30 +418,12 @@ class RiveGenImage {
   final String _assetName;
   final Set<String> flavors;
 
-  _rive.RiveAnimation rive({
-    String? artboard,
-    List<String> animations = const [],
-    List<String> stateMachines = const [],
-    BoxFit? fit,
-    Alignment? alignment,
-    Widget? placeHolder,
-    bool antialiasing = true,
-    bool useArtboardSize = false,
-    List<_rive.RiveAnimationController> controllers = const [],
-    _rive.OnInitCallback? onInit,
+  _rive.FileLoader riveFileLoader({
+    _rive.Factory? factory,
   }) {
-    return _rive.RiveAnimation.asset(
+    return _rive.FileLoader.fromAsset(
       _assetName,
-      artboard: artboard,
-      animations: animations,
-      stateMachines: stateMachines,
-      fit: fit,
-      alignment: alignment,
-      placeHolder: placeHolder,
-      antialiasing: antialiasing,
-      useArtboardSize: useArtboardSize,
-      controllers: controllers,
-      onInit: onInit,
+      riveFactory: factory ?? _rive.Factory.rive,
     );
   }
 

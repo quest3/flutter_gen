@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dart_style/dart_style.dart';
 import 'package:dartx/dartx_io.dart';
 import 'package:flutter_gen_core/flutter_generator.dart';
 import 'package:flutter_gen_core/generators/assets_generator.dart';
@@ -65,33 +64,31 @@ Future<(String, String)> runAssetsGen(
   final expected = formatter.format(File(fact).readAsStringSync());
   return (actual, expected);
 }
-///i18n
+/// I18n
 Future<void> expectedI18nGen(
-    String pubspec, String generated, String fact) async {
-  await FlutterGenerator(File(pubspec), assetsName: basename(generated))
+  String pubspec,
+  String generated,
+  String fact,
+) async {
+  await FlutterGenerator(File(pubspec), i18nName: p.basename(generated))
       .build();
 
   final pubspecFile = File(pubspec);
   final config = loadPubspecConfig(pubspecFile);
-  final formatter = DartFormatter(
-      pageWidth: config.pubspec.flutterGen.lineLength, lineEnding: '\n');
+  final formatter = buildDartFormatterFromConfig(config);
 
   final actual = generateI18n(
-      formatter,
-      pubspecFile.parent,
-      FlutterGenI18n(
-          enabled: config.pubspec.flutterGen.i18n.enabled,
-          outputs: config.pubspec.flutterGen.i18n.outputs,
-          directory: config.pubspec.flutterGen.i18n.directory));
-  final expected =
-  formatter.format(File(fact).readAsStringSync().replaceAll('\r\n', '\n'));
-
-  expect(
-    File(generated).readAsStringSync(),
-    isNotEmpty,
+    formatter,
+    pubspecFile.parent,
+    config.pubspec.flutterGen.i18n,
   );
+  final expected =
+      formatter.format(File(fact).readAsStringSync().replaceAll('\r\n', '\n'));
+
+  expect(File(generated).readAsStringSync(), isNotEmpty);
   expect(actual, expected);
 }
+
 /// Assets
 Future<(String, String)> expectedAssetsGen(
   String pubspec, {

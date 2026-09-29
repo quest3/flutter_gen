@@ -32,10 +32,8 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: echo "%LOCALAPPDATA%\Pub\Cache\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Get dependencies
-        run: |
-          dart pub global activate melos
-          melos bootstrap
+      - name: Prepare workspace
+        uses: bluefireteam/melos-action@v3
 
       - name: Generate test data and see if changes
         run: |
@@ -45,6 +43,10 @@ jobs:
       - name: Run tests for Dart packages
         if: startsWith(matrix.os, 'ubuntu')
         run: melos test:dart --no-select
+
+      - name: Test flutter_gen_core against both xml majors (6.x and 7.x)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: melos test:xml-matrix
 
       - name: Run tests for Flutter packages
         if: startsWith(matrix.os, 'ubuntu')
@@ -60,9 +62,20 @@ jobs:
           files: ./packages/core/coverage.lcov
 
       - name: Generate example then check formats and changes
-        run: |
+        run: | # Run format and diff for each gen step.
           melos run gen:examples:command --no-select
+          dart format --set-exit-if-changed examples
+          git --no-pager diff --exit-code examples
+
           melos run gen:examples:build_runner --no-select
+          dart format --set-exit-if-changed examples
+          git --no-pager diff --exit-code examples
+
+          melos run gen:examples:workspace:command --no-select
+          dart format --set-exit-if-changed examples
+          git --no-pager diff --exit-code examples
+
+          melos run gen:examples:workspace:build_runner --no-select
           dart format --set-exit-if-changed examples
           git --no-pager diff --exit-code examples
 

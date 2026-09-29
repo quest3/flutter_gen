@@ -30,8 +30,7 @@ String generateColors(
   buffer.writeln("import 'package:flutter/painting.dart';");
   buffer.writeln("import 'package:flutter/material.dart';");
   buffer.writeln();
-  buffer.writeln('class $className {');
-  buffer.writeln('$className._();');
+  buffer.writeln('abstract final class $className {');
   buffer.writeln();
 
   final colorList = <_Color>[];
@@ -107,8 +106,7 @@ class _Color {
   _Color.fromXmlElement(XmlElement element)
       : this(
           element.getAttribute('name')!,
-          // ignore: deprecated_member_use
-          element.text,
+          element.innerText,
           element.getAttribute('type')?.split(' ') ?? List.empty(),
         );
 

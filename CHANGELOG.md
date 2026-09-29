@@ -1,3 +1,49 @@
+## 5.15.0
+
+**Feature**
+
+- [#755](https://github.com/FlutterGen/flutter_gen/pull/755) Use `abstract final` class modifier for generated classes. by [@RahmiTufanoglu](https://github.com/RahmiTufanoglu)
+
+**Fix**
+
+- [#764](https://github.com/FlutterGen/flutter_gen/pull/764) Add `xml 7.x` support by widening `flutter_gen_core`'s `xml` constraint to `>=6.0.0 <8.0.0`. by [@Akhrameev](https://github.com/Akhrameev)
+
+**Development**
+
+- [#757](https://github.com/FlutterGen/flutter_gen/pull/757) Scope `GITHUB_TOKEN` to least privilege in the release workflow.
+- Fix tag glob in the `Release` / `Publish` workflows so pushing a `vMAJOR.MINOR.PATCH[+build|-pre]` tag actually triggers them (previous `publish.yml` used regex syntax that GitHub Actions filter globs never matched).
+- Bump CI toolchain: Flutter `3.44.4`, Node.js `24.18.0`, pnpm `11.9.0`, `lint-staged` `v17`.
+
+## 5.14.1
+
+**Development**
+
+- Fix package root resolution after build_runner 2.14.0 AOT changes. by [@Carapacik](https://github.com/Carapacik)
+
+## 5.14.0
+
+**Feature**
+
+- Add `build_runner --workspace` support for `flutter_gen_runner` using a manifest + post-process materialization pipeline.
+- Add `fluttergen --workspace` support to the command package, including package-local `build.yaml` overrides for each workspace member.
+
+**Development**
+
+- Document and align the minimum supported versions for the new build pipeline: Dart `>=3.7.0` and `build_runner >=2.12.0`.
+- Document the current `build_runner --workspace` rebuild limitation for manually deleted generated files and recommend `build_runner clean` before rebuilding.
+
+## 5.13.0+1
+
+**Development**
+
+- Fixes version conflict between packages.
+
+## 5.13.0
+
+**Development**
+
+- [#727](https://github.com/FlutterGen/flutter_gen/pull/727) Allow `rive 0.14.0`. by [@AlexV525](https://github.com/AlexV525)
+
 ## 5.12.0
 
 **Development**
@@ -444,7 +490,7 @@
 
 ## 3.1.2
 
-- [#117](https://github.com/FlutterGen/flutter_gen/issues/117) Update to analyzer 2.0.0.  
+- [#117](https://github.com/FlutterGen/flutter_gen/issues/117) Update to analyzer 2.0.0.
   [flutter_gen_runner (flutter_gen_core) 3.1.2 -> analyzer 2.0.0 workaround](https://github.com/FlutterGen/flutter_gen/issues/121)
 
   ```yaml

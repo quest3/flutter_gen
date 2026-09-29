@@ -1,10 +1,6 @@
 @TestOn('vm')
-import 'dart:io';
+library;
 
-import 'package:dart_style/dart_style.dart';
-import 'package:flutter_gen_core/generators/i18n_generator.dart';
-import 'package:flutter_gen_core/settings/config.dart';
-import 'package:flutter_gen_core/utils/error.dart';
 import 'package:test/test.dart';
 
 import 'gen_test_helper.dart';

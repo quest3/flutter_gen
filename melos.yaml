@@ -1,9 +1,12 @@
 name: FlutterGen
 
 packages:
-  - packages/**
-  - integrations/**
-  - examples/**
+  - packages/command
+  - packages/core
+  - packages/runner
+  - examples/example
+  - examples/example_resources
+  - examples/example_workspace
 
 ide:
   intellij:
@@ -30,7 +33,11 @@ scripts:
 
   format:
     run: |
-      dart format --set-exit-if-changed .
+      find . -name "*.dart" \
+        -not -path "*/actual_data/*" \
+        -not -path "*/.dart_tool/*" \
+        -not -path "*/build/*" \
+        -print0 | xargs -0 dart format --set-exit-if-changed
       git --no-pager diff --exit-code
     description: Format Dart files and exit if unstaged changes exist
 
@@ -41,11 +48,12 @@ scripts:
     description: flutter build apk
 
   gen:build_runner:
-    exec: dart run build_runner build --delete-conflicting-outputs
+    exec: dart run build_runner build -d
     packageFilters:
       ignore:
         - example
         - example_resources
+        - example_workspace_root
       dependsOn: build_runner
     description: dart run build_runner build --delete-conflicting-outputs
 
@@ -58,14 +66,26 @@ scripts:
     description: dart ../../packages/command/bin/flutter_gen_command.dart
 
   gen:examples:build_runner:
-    run: flutter pub run build_runner build --delete-conflicting-outputs
+    run: dart run build_runner clean; dart run build_runner build -d
     exec:
       concurrency: 1
     packageFilters:
       scope:
         - example
         - example_resources
-    description: flutter pub run build_runner build --delete-conflicting-outputs
+    description: dart run build_runner build --delete-conflicting-outputs
+
+  gen:examples:workspace:command:
+    exec: dart ../../packages/command/bin/flutter_gen_command.dart --workspace -c pubspec.yaml
+    packageFilters:
+      scope: example_workspace_root
+    description: dart ../../packages/command/bin/flutter_gen_command.dart --workspace -c pubspec.yaml
+
+  gen:examples:workspace:build_runner:
+    exec: dart run build_runner clean; dart run build_runner build --workspace -d
+    packageFilters:
+      scope: example_workspace_root
+    description: dart run build_runner build --workspace --delete-conflicting-outputs
 
   gen:actual_data:
     run: dart packages/core/scripts/generate_facts.dart
@@ -101,6 +121,10 @@ scripts:
     run: |
       bash ./scripts/coverage.sh packages/core
     description: bash ./scripts/coverage.sh packages/core
+
+  test:xml-matrix:
+    run: dart scripts/test_xml_versions.dart
+    description: Run flutter_gen_core tests against both supported xml majors (6.x and 7.x)
 
   publish:force:
     run: dart pub publish -f

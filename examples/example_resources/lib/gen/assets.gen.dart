@@ -56,9 +56,7 @@ class $AssetsUnknownGen {
   List<String> get values => [unknownMimeType];
 }
 
-class ResAssets {
-  const ResAssets._();
-
+abstract final class ResAssets {
   static const String package = 'example_resources';
 
   static const $AssetsImagesGen images = $AssetsImagesGen();
@@ -257,30 +255,12 @@ class RiveGenImage {
 
   static const String package = 'example_resources';
 
-  _rive.RiveAnimation rive({
-    String? artboard,
-    List<String> animations = const [],
-    List<String> stateMachines = const [],
-    BoxFit? fit,
-    Alignment? alignment,
-    Widget? placeHolder,
-    bool antialiasing = true,
-    bool useArtboardSize = false,
-    List<_rive.RiveAnimationController> controllers = const [],
-    _rive.OnInitCallback? onInit,
+  _rive.FileLoader riveFileLoader({
+    _rive.Factory? factory,
   }) {
-    return _rive.RiveAnimation.asset(
+    return _rive.FileLoader.fromAsset(
       'packages/example_resources/$_assetName',
-      artboard: artboard,
-      animations: animations,
-      stateMachines: stateMachines,
-      fit: fit,
-      alignment: alignment,
-      placeHolder: placeHolder,
-      antialiasing: antialiasing,
-      useArtboardSize: useArtboardSize,
-      controllers: controllers,
-      onInit: onInit,
+      riveFactory: factory ?? _rive.Factory.rive,
     );
   }
 
