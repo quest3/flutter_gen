@@ -87,9 +87,11 @@ class FlutterGenerator {
       writer(generated, fontsPath);
       log.info('Generated: $fontsPath');
     }
-    if (flutterGen.i18n.enabled && flutter.assets.isNotEmpty) {
-      final generated = generateI18n(formatter, pubspecFile.parent, flutterGen.i18n);
-      final i18nPath = normalize(join(pubspecFile.parent.path, output, i18nName));
+    if (flutterGen.i18n.enabled) {
+      final generated =
+          generateI18n(formatter, pubspecFile.parent, flutterGen.i18n);
+      final i18nPath =
+          normalize(join(pubspecFile.parent.path, output, i18nName));
       writer(generated, i18nPath);
       log.info('Generated: $i18nPath');
     }

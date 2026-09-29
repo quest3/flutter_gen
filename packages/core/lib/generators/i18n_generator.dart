@@ -17,8 +17,13 @@ String generateI18n(
   Directory rootDirectory,
   FlutterGenI18n i18nConfig,
 ) {
-  Directory i18nDirectory =
-      Directory('${rootDirectory.path}/${i18nConfig.directory}');
+  final directory = i18nConfig.directory;
+  if (directory == null || directory.isEmpty) {
+    throw const InvalidSettingsException(
+      '"flutter_gen.i18n.directory" is required when i18n is enabled.',
+    );
+  }
+  Directory i18nDirectory = Directory('${rootDirectory.path}/$directory');
   if (!i18nDirectory.existsSync()) {
     throw InvalidSettingsException(
         'directory "${i18nDirectory.path}" not exists.');

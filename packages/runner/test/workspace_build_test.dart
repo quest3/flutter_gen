@@ -237,6 +237,77 @@ targets:
     },
     timeout: const Timeout(Duration(minutes: 5)),
   );
+
+  test(
+    'generates i18n keys and rebuilds when locale files change',
+    () async {
+      final workspaceDir = await _createWorkspaceFixture();
+      addTearDown(() async {
+        if (workspaceDir.existsSync()) {
+          workspaceDir.deleteSync(recursive: true);
+        }
+      });
+
+      final appDir = Directory(p.join(workspaceDir.path, 'packages', 'app'));
+      final appPubspec = File(p.join(appDir.path, 'pubspec.yaml'));
+      appPubspec.writeAsStringSync(
+        appPubspec
+            .readAsStringSync()
+            .replaceFirst(
+              '  colors:\n',
+              '  i18n:\n'
+                  '    enabled: true\n'
+                  '    directory: assets/i18n\n'
+                  '  colors:\n',
+            )
+            .replaceFirst(
+              '    - assets/images/\n',
+              '    - assets/images/\n'
+                  '    - assets/i18n/en/\n'
+                  '    - assets/i18n/zh/\n',
+            ),
+      );
+      final enFile = File(p.join(appDir.path, 'assets', 'i18n', 'en', 'a.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"hello":"Hello","nested":{"title":"Title"}}');
+      final zhFile = File(p.join(appDir.path, 'assets', 'i18n', 'zh', 'a.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"hello":"你好","nested":{"title":"标题"}}');
+
+      Future<void> build() => _runProcess(
+            'dart',
+            [
+              'run',
+              'build_runner',
+              'build',
+              '--workspace',
+              '--delete-conflicting-outputs',
+            ],
+            workingDirectory: workspaceDir.path,
+          );
+
+      await _runProcess(
+        'flutter',
+        ['pub', 'get'],
+        workingDirectory: workspaceDir.path,
+      );
+      await build();
+
+      final i18nFile = File(p.join(appDir.path, 'lib', 'gen', 'i18n.gen.dart'));
+      expect(i18nFile.existsSync(), isTrue);
+      expect(i18nFile.readAsStringSync(), contains('"a.nested.title"'));
+      expect(i18nFile.readAsStringSync(), isNot(contains('"a.bye"')));
+
+      // Only the locale files change; the manifest must be rebuilt anyway.
+      enFile.writeAsStringSync('{"hello":"Hello","bye":"Bye"}');
+      zhFile.writeAsStringSync('{"hello":"你好","bye":"再见"}');
+      await build();
+
+      expect(i18nFile.readAsStringSync(), contains('"a.bye"'));
+      expect(i18nFile.readAsStringSync(), isNot(contains('"a.nested.title"')));
+    },
+    timeout: const Timeout(Duration(minutes: 5)),
+  );
 }
 
 Future<Directory> _createWorkspaceFixture() async {
