@@ -1,3 +1,9 @@
+## Unreleased
+
+**Breaking**
+
+- Generated i18n key classes (`I18nKeys*`) now use the `abstract final` class modifier, consistent with other generated classes. The unused `const` constructor is removed, so the classes can no longer be instantiated, extended, or implemented; static key access (e.g. `I18nKeysCommon.copy`) is unaffected.
+
 ## 5.15.0
 
 **Feature**

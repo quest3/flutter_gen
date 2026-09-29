@@ -175,8 +175,7 @@ class NamespaceData {
 
   String generateNewFileContent(String localeName, DartFormatter formatter) {
     final buffer = StringBuffer();
-    buffer.writeln('class $className {');
-    buffer.writeln('const $className();');
+    buffer.writeln('abstract final class $className {');
     Map<String, _PluralData> plurals = {};
     for (final key in flattenData.keys) {
       List<String> words = key.split(_tempSeparator);
